@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "primary": "#006591",
+                        "danger": "#EF4444",
+                        "surface-container-high": "#dee8ff",
+                        "on-background": "#111c2d",
+                        "on-tertiary-fixed": "#2c1600",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "on-secondary-container": "#00714d",
+                        "on-primary-container": "#003751",
+                        "tertiary": "#8a5100",
+                        "background": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#bec8d2",
+                        "secondary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#89ceff",
+                        "warning": "#F59E0B",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary-container": "#4d2b00",
+                        "surface-variant": "#d8e3fb",
+                        "inverse-primary": "#89ceff",
+                        "tertiary-fixed": "#ffdcbd",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-container": "#de8712",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4850",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#6cf8bb",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#263143",
+                        "surface-container": "#e7eeff",
+                        "surface-dim": "#cfdaf2",
+                        "primary-fixed": "#c9e6ff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-low": "#f0f3ff",
+                        "surface": "#FFFFFF",
+                        "on-primary-fixed": "#001e2f",
+                        "border": "#E2E8F0",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-surface": "#111c2d",
+                        "primary-container": "#0ea5e9",
+                        "surface-tint": "#006591",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "outline": "#6e7881"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "grid-gutter": "16px",
+                        "touch-target": "44px",
+                        "container-padding": "16px",
+                        "base": "4px",
+                        "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .bottom-sheet-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .backdrop-blur-custom {
+            backdrop-filter: blur(8px);
+            background-color: rgba(17, 28, 45, 0.4);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-hidden">
+    <!-- Top App Bar -->
+    <header
+        class="w-full sticky top-0 z-50 bg-background dark:bg-on-background flex justify-between items-center px-container-padding h-touch-target">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed-dim">PharmaStock
+        </h1>
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">notifications</span>
+            <div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+                <img alt="User Profile" class="w-full h-full object-cover"
+                    data-alt="A professional close-up portrait of a pharmacist wearing a clean white clinical coat and a stethoscope. The background is a softly blurred modern pharmacy with organized shelves of medicine, lit by bright, natural daylight. The image has a high-quality, clinical health-tech aesthetic with a focus on trust and professionalism."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEAdXfUyOYFVXv7n94fqe1FNJZSnjjPn1G4Q8foywgBglgY3JgF3JAG6NbTzZLBTTCWWKw81G-PkanBq2Eog42MPR8MUadKNJsSTnujoAI-aJizK1dpg8ecaqD9HYvqyJx_o6OAPQ51e_nxFJWpvP3YCelD5tQU5-dKSIVcFv3jSjZXGxtyxz2nhnoX2RJRBQOMToEtBRwRo1KpQDXi9b1yV_mif4sxZZH-AMR_2shiPv4s6CFFiJtmCWOJR5ytRdAfpt4v_WmAyw" />
+            </div>
+        </div>
+    </header>
+    <!-- Main Content (Inventory List - Backdrop) -->
+    <main class="px-container-padding py-6 space-y-6 pb-24 overflow-y-auto h-[calc(100vh-112px)]">
+        <div class="flex justify-between items-center">
+            <h2 class="font-headline-md-mobile text-headline-md-mobile">Inventory</h2>
+            <button
+                class="bg-primary-container text-on-primary-container px-4 py-2 rounded-xl font-label-md text-label-md flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                Filter
+            </button>
+        </div>
+        <!-- Inventory List (Bento-style Grid) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap">
+            <!-- Item 1 -->
+            <div class="bg-surface p-4 rounded-xl shadow-sm border-r-4 border-secondary flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-title-md text-title-md">Amoxicillin 500mg</p>
+                        <p class="text-on-surface-variant font-body-sm text-body-sm">Antibiotic • Capsule</p>
+                    </div>
+                    <span class="bg-secondary/10 text-secondary px-2 py-1 rounded text-[10px] font-bold">IN STOCK</span>
+                </div>
+                <div class="mt-4 flex justify-between items-end">
+                    <p class="font-headline-md text-headline-md text-primary">1,240 <span
+                            class="text-body-sm font-normal text-on-surface-variant">pcs</span></p>
+                    <p class="text-on-surface-variant font-label-md text-label-md">Exp: 12/2025</p>
+                </div>
+            </div>
+            <!-- Item 2 -->
+            <div class="bg-surface p-4 rounded-xl shadow-sm border-r-4 border-warning flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-title-md text-title-md">Paracetamol 500mg</p>
+                        <p class="text-on-surface-variant font-body-sm text-body-sm">Analgesic • Tablet</p>
+                    </div>
+                    <span class="bg-warning/10 text-warning px-2 py-1 rounded text-[10px] font-bold">LOW STOCK</span>
+                </div>
+                <div class="mt-4 flex justify-between items-end">
+                    <p class="font-headline-md text-headline-md text-warning">85 <span
+                            class="text-body-sm font-normal text-on-surface-variant">pcs</span></p>
+                    <p class="text-on-surface-variant font-label-md text-label-md">Exp: 08/2024</p>
+                </div>
+            </div>
+            <!-- Item 3 -->
+            <div class="bg-surface p-4 rounded-xl shadow-sm border-r-4 border-danger flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-title-md text-title-md">Insulin Glargine</p>
+                        <p class="text-on-surface-variant font-body-sm text-body-sm">Antidiabetic • Injection</p>
+                    </div>
+                    <span class="bg-danger/10 text-danger px-2 py-1 rounded text-[10px] font-bold">OUT OF STOCK</span>
+                </div>
+                <div class="mt-4 flex justify-between items-end">
+                    <p class="font-headline-md text-headline-md text-danger">0 <span
+                            class="text-body-sm font-normal text-on-surface-variant">vial</span></p>
+                    <p class="text-on-surface-variant font-label-md text-label-md">Exp: --/--</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 w-full z-40 shadow-sm bg-surface dark:bg-inverse-surface flex justify-around items-center h-16 px-2">
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-label-md text-label-md">Dashboard</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1">
+            <span class="material-symbols-outlined">barcode_scanner</span>
+            <span class="font-label-md text-label-md">Scan</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-xl px-3 py-1">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            <span class="font-label-md text-label-md">Inventory</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1">
+            <span class="material-symbols-outlined">chat_bubble</span>
+            <span class="font-label-md text-label-md">AI Chat</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-md text-label-md">Profile</span>
+        </button>
+    </nav>
+    <!-- Modal Backdrop -->
+    <div class="fixed inset-0 z-[60] backdrop-blur-custom opacity-100 transition-opacity duration-300"
+        id="modalBackdrop"></div>
+    <!-- Bottom Sheet Modal -->
+    <div class="fixed bottom-0 left-0 right-0 z-[70] bg-surface rounded-t-[28px] bottom-sheet-transition translate-y-0 max-h-[795px] flex flex-col shadow-[0_-8px_30px_rgb(0,0,0,0.12)]"
+        id="bottomSheet">
+        <!-- Grab Handle -->
+        <div class="w-full flex justify-center py-4 cursor-grab active:cursor-grabbing" id="sheetHandle">
+            <div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
+        </div>
+        <div class="px-6 pb-8 overflow-y-auto hide-scrollbar space-y-6">
+            <div class="flex justify-between items-center">
+                <h3 class="font-headline-lg-mobile text-headline-lg-mobile">Tambah Stok</h3>
+                <button
+                    class="flex items-center gap-2 text-primary font-label-md text-label-md bg-primary/10 px-3 py-2 rounded-lg active:scale-95 transition-transform"
+                    id="scanBtn">
+                    <span class="material-symbols-outlined text-[18px]">barcode_scanner</span>
+                    Scan Barcode
+                </button>
+            </div>
+            <form class="space-y-5">
+                <!-- Medicine Name -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-md text-label-md text-on-surface-variant" for="medName">Medicine
+                        Name</label>
+                    <input
+                        class="w-full h-touch-target px-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary text-body-md"
+                        id="medName" placeholder="Contoh: Paracetamol 500mg" type="text" />
+                </div>
+                <!-- Category -->
+                <div class="space-y-1.5">
+                    <label class="block font-label-md text-label-md text-on-surface-variant"
+                        for="category">Category</label>
+                    <div class="relative">
+                        <select
+                            class="w-full h-touch-target px-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary text-body-md appearance-none"
+                            id="category">
+                            <option value="">Pilih Kategori</option>
+                            <option value="antibiotic">Antibiotic</option>
+                            <option value="analgesic">Analgesic</option>
+                            <option value="antidiabetic">Antidiabetic</option>
+                            <option value="vitamin">Vitamin &amp; Supplement</option>
+                        </select>
+                        <span
+                            class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Quantity Counter -->
+                    <div class="space-y-1.5">
+                        <label class="block font-label-md text-label-md text-on-surface-variant">Quantity</label>
+                        <div class="flex items-center bg-surface-container-low rounded-xl h-touch-target px-2">
+                            <button
+                                class="w-8 h-8 flex items-center justify-center text-primary rounded-lg hover:bg-white/50 active:scale-90"
+                                onclick="updateQty(-1)" type="button">
+                                <span class="material-symbols-outlined">remove</span>
+                            </button>
+                            <input class="w-full text-center bg-transparent border-none focus:ring-0 font-title-md"
+                                id="qty" readonly="" type="number" value="0" />
+                            <button
+                                class="w-8 h-8 flex items-center justify-center text-primary rounded-lg hover:bg-white/50 active:scale-90"
+                                onclick="updateQty(1)" type="button">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Expiry Date -->
+                    <div class="space-y-1.5">
+                        <label class="block font-label-md text-label-md text-on-surface-variant" for="expiry">Expiry
+                            Date</label>
+                        <div class="relative">
+                            <input
+                                class="w-full h-touch-target px-4 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary text-body-md"
+                                id="expiry" type="date" />
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Buttons -->
+                <div class="pt-4 space-y-3">
+                    <button
+                        class="w-full h-touch-target bg-primary text-on-primary font-title-md rounded-xl shadow-sm active:scale-[0.98] transition-all"
+                        type="button">
+                        Simpan Stok
+                    </button>
+                    <button
+                        class="w-full h-touch-target bg-white text-on-surface-variant border border-outline-variant font-title-md rounded-xl active:scale-[0.98] transition-all"
+                        id="closeBtn" type="button">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Floating Action Button (FAB) - For Background Reference -->
+    <button
+        class="fixed right-6 bottom-20 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center z-30 transition-transform active:scale-90">
+        <span class="material-symbols-outlined text-[28px]">add</span>
+    </button>
+    <script>
+        const backdrop = document.getElementById('modalBackdrop');
+        const sheet = document.getElementById('bottomSheet');
+        const closeBtn = document.getElementById('closeBtn');
+        const handle = document.getElementById('sheetHandle');
+
+        function updateQty(val) {
+            const qtyInput = document.getElementById('qty');
+            let current = parseInt(qtyInput.value);
+            qtyInput.value = Math.max(0, current + val);
+        }
+
+        function closeModal() {
+            sheet.style.transform = 'translateY(100%)';
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                backdrop.style.display = 'none';
+                sheet.style.display = 'none';
+            }, 300);
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+
+        // Basic Drag to Dismiss Emulation
+        let startY = 0;
+        let currentY = 0;
+
+        handle.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            sheet.classList.remove('bottom-sheet-transition');
+        });
+
+        handle.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+            if (deltaY > 0) {
+                sheet.style.transform = `translateY(${deltaY}px)`;
+            }
+        });
+
+        handle.addEventListener('touchend', (e) => {
+            sheet.classList.add('bottom-sheet-transition');
+            const deltaY = currentY - startY;
+            if (deltaY > 150) {
+                closeModal();
+            } else {
+                sheet.style.transform = 'translateY(0)';
+            }
+        });
+    </script>
+</body>
+
+</html>

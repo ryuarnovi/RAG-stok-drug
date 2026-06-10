@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "primary": "#006591",
+                        "danger": "#EF4444",
+                        "surface-container-high": "#dee8ff",
+                        "on-background": "#111c2d",
+                        "on-tertiary-fixed": "#2c1600",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "on-secondary-container": "#00714d",
+                        "on-primary-container": "#003751",
+                        "tertiary": "#8a5100",
+                        "background": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#bec8d2",
+                        "secondary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#89ceff",
+                        "warning": "#F59E0B",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary-container": "#4d2b00",
+                        "surface-variant": "#d8e3fb",
+                        "inverse-primary": "#89ceff",
+                        "tertiary-fixed": "#ffdcbd",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-container": "#de8712",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4850",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#6cf8bb",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#263143",
+                        "surface-container": "#e7eeff",
+                        "surface-dim": "#cfdaf2",
+                        "primary-fixed": "#c9e6ff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-low": "#f0f3ff",
+                        "surface": "#FFFFFF",
+                        "on-primary-fixed": "#001e2f",
+                        "border": "#E2E8F0",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-surface": "#111c2d",
+                        "primary-container": "#0ea5e9",
+                        "surface-tint": "#006591",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "outline": "#6e7881"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "grid-gutter": "16px",
+                        "touch-target": "44px",
+                        "container-padding": "16px",
+                        "base": "4px",
+                        "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen pb-24">
+    <!-- TopAppBar -->
+    <header class="bg-background dark:bg-on-background w-full sticky top-0 z-50">
+        <div class="flex justify-between items-center px-container-padding h-touch-target">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high">
+                    <img alt="User Profile" class="w-full h-full object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2ojTaWlyeBhHe0AE8EYVmeUnycio1wXVTZJ1RnRA0Mgyzhu5ZHHxWnbpwmiQaXQ8XCyPY_lH7JlLRxooeLhtIJGCQih1ndQ6GkX6dHcn-yVedljrwHy89ZSmTTXCF3NC1Z_FvRlNx7JOGDycy5dq_cO94ur50JTtkYyrla1GjobhabLYO5ihQUmYPYV2niAovwIZB5pCOiPD27K9Hvp7D9bjRJtc5ZCHzLX9Ko4OxTY3ZmOiG8eMmWKK-VDEkOb0khB9BmVMKUmc" />
+                </div>
+                <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed-dim">
+                    PharmaStock</h1>
+            </div>
+            <button
+                class="text-on-surface-variant dark:text-outline-variant transition-colors duration-200 active:scale-95">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+        </div>
+    </header>
+    <main class="px-container-padding py-stack-gap space-y-6">
+        <!-- Search & Filter Section -->
+        <section class="space-y-4">
+            <div class="relative w-full">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                    data-icon="search">search</span>
+                <input
+                    class="w-full h-touch-target pl-12 pr-4 bg-surface border border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    placeholder="Cari obat atau kategori..." type="text" />
+            </div>
+            <!-- Chips Filters -->
+            <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                <button
+                    class="whitespace-nowrap px-4 py-2 bg-primary text-on-primary rounded-full font-label-md text-label-md">Semua</button>
+                <button
+                    class="whitespace-nowrap px-4 py-2 bg-surface border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">Antibiotik</button>
+                <button
+                    class="whitespace-nowrap px-4 py-2 bg-surface border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">Analgesik</button>
+                <button
+                    class="whitespace-nowrap px-4 py-2 bg-surface border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">Sirup</button>
+                <button
+                    class="whitespace-nowrap px-4 py-2 bg-surface border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors">Tablet</button>
+            </div>
+        </section>
+        <!-- Inventory List Header -->
+        <div class="flex justify-between items-center">
+            <h2 class="font-headline-md text-headline-md text-on-surface">Daftar Inventaris</h2>
+            <button class="flex items-center gap-1 text-primary text-label-md font-label-md">
+                <span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                Filter
+            </button>
+        </div>
+        <!-- Medicine List -->
+        <div class="space-y-3">
+            <!-- Item 1: In Stock -->
+            <div class="bg-surface shadow-sm rounded-xl overflow-hidden flex transition-transform active:scale-[0.98]">
+                <div class="w-1.5 bg-secondary"></div>
+                <div class="flex-1 p-4 flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h3 class="font-title-md text-title-md text-on-surface">Amoxicillin 500mg</h3>
+                        <p class="text-body-sm text-on-surface-variant">Antibiotik • Tablet</p>
+                        <div class="pt-2">
+                            <span
+                                class="px-2 py-1 bg-secondary/10 text-secondary rounded text-[10px] font-bold uppercase tracking-wider">In
+                                Stock</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-headline-md font-headline-md text-on-surface">1,240</p>
+                        <p class="text-body-sm text-outline">Unit</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Item 2: Low Stock -->
+            <div class="bg-surface shadow-sm rounded-xl overflow-hidden flex transition-transform active:scale-[0.98]">
+                <div class="w-1.5 bg-warning"></div>
+                <div class="flex-1 p-4 flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h3 class="font-title-md text-title-md text-on-surface">Paracetamol 500mg</h3>
+                        <p class="text-body-sm text-on-surface-variant">Analgesik • Tablet</p>
+                        <div class="pt-2">
+                            <span
+                                class="px-2 py-1 bg-warning/10 text-warning rounded text-[10px] font-bold uppercase tracking-wider">Low
+                                Stock</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-headline-md font-headline-md text-warning">45</p>
+                        <p class="text-body-sm text-outline">Unit</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Item 3: Expired -->
+            <div class="bg-surface shadow-sm rounded-xl overflow-hidden flex transition-transform active:scale-[0.98]">
+                <div class="w-1.5 bg-danger"></div>
+                <div class="flex-1 p-4 flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h3 class="font-title-md text-title-md text-on-surface">Cetirizine Syrup</h3>
+                        <p class="text-body-sm text-on-surface-variant">Antihistamin • Cair</p>
+                        <div class="pt-2">
+                            <span
+                                class="px-2 py-1 bg-danger/10 text-danger rounded text-[10px] font-bold uppercase tracking-wider">Expired</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-headline-md font-headline-md text-danger">12</p>
+                        <p class="text-body-sm text-outline">Botol</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Item 4: In Stock -->
+            <div class="bg-surface shadow-sm rounded-xl overflow-hidden flex transition-transform active:scale-[0.98]">
+                <div class="w-1.5 bg-secondary"></div>
+                <div class="flex-1 p-4 flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h3 class="font-title-md text-title-md text-on-surface">Ibuprofen 400mg</h3>
+                        <p class="text-body-sm text-on-surface-variant">Anti-inflamasi • Kapsul</p>
+                        <div class="pt-2">
+                            <span
+                                class="px-2 py-1 bg-secondary/10 text-secondary rounded text-[10px] font-bold uppercase tracking-wider">In
+                                Stock</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-headline-md font-headline-md text-on-surface">850</p>
+                        <p class="text-body-sm text-outline">Unit</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Item 5: Low Stock -->
+            <div class="bg-surface shadow-sm rounded-xl overflow-hidden flex transition-transform active:scale-[0.98]">
+                <div class="w-1.5 bg-warning"></div>
+                <div class="flex-1 p-4 flex justify-between items-start">
+                    <div class="space-y-1">
+                        <h3 class="font-title-md text-title-md text-on-surface">Metformin HCl</h3>
+                        <p class="text-body-sm text-on-surface-variant">Antidiabetes • Tablet</p>
+                        <div class="pt-2">
+                            <span
+                                class="px-2 py-1 bg-warning/10 text-warning rounded text-[10px] font-bold uppercase tracking-wider">Low
+                                Stock</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-headline-md font-headline-md text-warning">18</p>
+                        <p class="text-body-sm text-outline">Unit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- FAB -->
+    <button
+        class="fixed bottom-20 right-6 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center transition-transform active:scale-90 z-40">
+        <span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+        class="fixed bottom-0 w-full z-50 shadow-sm bg-surface dark:bg-inverse-surface h-16 flex justify-around items-center px-2">
+        <!-- Dashboard -->
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="font-label-md text-label-md">Dashboard</span>
+        </a>
+        <!-- Scan -->
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+            <span class="font-label-md text-label-md">Scan</span>
+        </a>
+        <!-- AI Chat -->
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+            <span class="font-label-md text-label-md">AI Chat</span>
+        </a>
+        <!-- Inventory (Active) -->
+        <a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-xl px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="inventory_2"
+                style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            <span class="font-label-md text-label-md">Inventory</span>
+        </a>
+        <!-- Profile -->
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="font-label-md text-label-md">Profile</span>
+        </a>
+    </nav>
+    <script>
+        // Micro-interaction for filter chips
+        const chips = document.querySelectorAll('.hide-scrollbar button');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-primary', 'text-on-primary');
+                    c.classList.add('bg-surface', 'border-outline-variant', 'text-on-surface-variant');
+                });
+                chip.classList.remove('bg-surface', 'border-outline-variant', 'text-on-surface-variant');
+                chip.classList.add('bg-primary', 'text-on-primary');
+            });
+        });
+
+        // Simple search feedback interaction
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.bg-surface.shadow-sm');
+
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const category = card.querySelector('p').textContent.toLowerCase();
+                if (title.includes(query) || category.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

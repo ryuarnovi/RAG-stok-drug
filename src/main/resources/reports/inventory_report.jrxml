@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="inventory_report" 
+              pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+    <parameter name="REPORT_TITLE" class="java.lang.String"/>
+    <parameter name="GENERATED_DATE" class="java.lang.String"/>
+    <queryString>
+        <![CDATA[SELECT medicine_code, medicine_name, category, stock_quantity, minimum_stock, purchase_price, selling_price, expiry_date FROM medicines]]>
+    </queryString>
+    <field name="medicine_code" class="java.lang.String"/>
+    <field name="medicine_name" class="java.lang.String"/>
+    <field name="category" class="java.lang.String"/>
+    <field name="stock_quantity" class="java.lang.Integer"/>
+    <field name="minimum_stock" class="java.lang.Integer"/>
+    <field name="purchase_price" class="java.math.BigDecimal"/>
+    <field name="selling_price" class="java.math.BigDecimal"/>
+    <field name="expiry_date" class="java.sql.Date"/>
+    <title>
+        <band height="60">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{REPORT_TITLE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="30" width="555" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Dicetak pada: " + $P{GENERATED_DATE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Kode]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="80" y="0" width="130" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Nama Obat]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="210" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Kategori]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="290" y="0" width="50" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Stok]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="340" y="0" width="50" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Min]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="390" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Harga Jual]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="470" y="0" width="85" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Kadaluarsa]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{medicine_code}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="80" y="0" width="130" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[" " + $F{medicine_name}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="210" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{category}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="290" y="0" width="50" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{stock_quantity}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="340" y="0" width="50" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{minimum_stock}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0">
+                <reportElement x="390" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{selling_price}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy">
+                <reportElement x="470" y="0" width="85" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{expiry_date}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="355" y="0" width="200" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Halaman " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

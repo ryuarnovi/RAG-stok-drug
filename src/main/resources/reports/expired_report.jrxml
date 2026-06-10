@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="expired_report" 
+              pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+    <parameter name="REPORT_TITLE" class="java.lang.String"/>
+    <parameter name="GENERATED_DATE" class="java.lang.String"/>
+    <queryString>
+        <![CDATA[SELECT medicine_name, batch_number, expiry_date, stock_quantity, DATEDIFF(expiry_date, CURDATE()) AS days_left FROM medicines WHERE expiry_date <= DATE_ADD(CURDATE(), INTERVAL 60 DAY) ORDER BY expiry_date ASC]]>
+    </queryString>
+    <field name="medicine_name" class="java.lang.String"/>
+    <field name="batch_number" class="java.lang.String"/>
+    <field name="expiry_date" class="java.sql.Date"/>
+    <field name="stock_quantity" class="java.lang.Integer"/>
+    <field name="days_left" class="java.lang.Long"/>
+    <title>
+        <band height="60">
+            <textField>
+                <reportElement x="0" y="0" width="555" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{REPORT_TITLE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="30" width="555" height="20"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Dicetak pada: " + $P{GENERATED_DATE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="180" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Nama Obat]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="180" y="0" width="100" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Batch No]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="280" y="0" width="100" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Tgl Kadaluarsa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="380" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Stok Sisa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="460" y="0" width="95" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Sisa Hari]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="180" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[" " + $F{medicine_name}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="180" y="0" width="100" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{batch_number}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy">
+                <reportElement x="280" y="0" width="100" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{expiry_date}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="380" y="0" width="80" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{stock_quantity}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="460" y="0" width="95" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{days_left} <= 0 ? "KADALUARSA" : $F{days_left} + " hari"]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="355" y="0" width="200" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Halaman " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

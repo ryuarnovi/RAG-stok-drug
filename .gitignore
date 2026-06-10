@@ -1,0 +1,33 @@
+# Environment & Credentials
+.env
+.env.*
+*.env
+!/.env.example
+
+# API Keys & Secrets
+**/secrets/
+**/credentials/
+
+# Java
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Build
+target/
+build/
+out/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PharmaStock AI Chat</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "primary": "#006591",
+                        "danger": "#EF4444",
+                        "surface-container-high": "#dee8ff",
+                        "on-background": "#111c2d",
+                        "on-tertiary-fixed": "#2c1600",
+                        "tertiary-fixed-dim": "#ffb86e",
+                        "on-secondary-container": "#00714d",
+                        "on-primary-container": "#003751",
+                        "tertiary": "#8a5100",
+                        "background": "#F8FAFC",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#bec8d2",
+                        "secondary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#89ceff",
+                        "warning": "#F59E0B",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary-container": "#4d2b00",
+                        "surface-variant": "#d8e3fb",
+                        "inverse-primary": "#89ceff",
+                        "tertiary-fixed": "#ffdcbd",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-container": "#de8712",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4850",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#6cf8bb",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#263143",
+                        "surface-container": "#e7eeff",
+                        "surface-dim": "#cfdaf2",
+                        "primary-fixed": "#c9e6ff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-low": "#f0f3ff",
+                        "surface": "#FFFFFF",
+                        "on-primary-fixed": "#001e2f",
+                        "border": "#E2E8F0",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-surface": "#111c2d",
+                        "primary-container": "#0ea5e9",
+                        "surface-tint": "#006591",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#693c00",
+                        "outline": "#6e7881"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "grid-gutter": "16px",
+                        "touch-target": "44px",
+                        "container-padding": "16px",
+                        "base": "4px",
+                        "stack-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md-mobile": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .chat-container {
+            height: calc(100vh - 64px - 64px - 80px);
+            /* Adjusting for TopAppBar, BottomNavBar, and Input */
+            scrollbar-width: thin;
+            scrollbar-color: #bec8d2 transparent;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #bec8d2;
+            border-radius: 10px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md selection:bg-primary-fixed">
+    <!-- TopAppBar -->
+    <header
+        class="w-full sticky top-0 z-50 bg-background flex justify-between items-center px-container-padding h-touch-target">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+                <img alt="Profile" class="w-full h-full object-cover"
+                    data-alt="A professional pharmacist profile picture with a friendly expression, wearing a white lab coat and a stethoscope. The background is a clean, minimalist pharmaceutical office with soft blue and white tones, matching a clinical health-tech aesthetic. High-quality lighting emphasizes professional trust and efficiency."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP489hWVgZfscTjttapj9QfY5iZb7ImwhwmB9P7N1sHP0CW47mXbILsWct6mZgtvgDb8uCbVcSi88Bgc6vxp5xQlQeu_14mXPYTyryb0d259xKEcSWB_XQv9dZw0Cyv0MlM7pRcvD87Muq7XWQJKhdVFeQHRXzd33ukggA2u602JoNeZOYjsFdBYsNMqQHfycdD6DrHYSPe6hDm6x5cGUMaHlcUHI9R-WcvpSzWmQ2mtrzH1IETexqOP38NY6rMcvj6dzeq6kXLLc" />
+            </div>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">PharmaStock</h1>
+        </div>
+        <button class="text-on-surface-variant transition-colors duration-200 active:scale-95">
+            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+    </header>
+    <!-- Chat Interface Canvas -->
+    <main class="max-w-xl mx-auto px-container-padding flex flex-col pt-4">
+        <!-- Suggestions Section -->
+        <section class="mb-4">
+            <h2 class="font-label-md text-label-md text-on-surface-variant uppercase mb-3">Saran Pertanyaan</h2>
+            <div class="flex flex-wrap gap-2">
+                <button
+                    class="bg-surface border border-border px-3 py-2 rounded-xl text-body-md hover:bg-surface-container-low transition-all active:scale-95 text-primary text-left">
+                    "Berapa sisa Paracetamol?"
+                </button>
+                <button
+                    class="bg-surface border border-border px-3 py-2 rounded-xl text-body-md hover:bg-surface-container-low transition-all active:scale-95 text-primary text-left">
+                    "Cek obat kadaluwarsa"
+                </button>
+                <button
+                    class="bg-surface border border-border px-3 py-2 rounded-xl text-body-md hover:bg-surface-container-low transition-all active:scale-95 text-primary text-left">
+                    "Stok kritis hari ini"
+                </button>
+            </div>
+        </section>
+        <!-- Messages Area -->
+        <div class="chat-container overflow-y-auto space-y-stack-gap pb-4" id="chat-window">
+            <!-- AI Welcome Message -->
+            <div class="flex gap-3 max-w-[85%] fade-in">
+                <div class="w-8 h-8 rounded-lg bg-primary flex-shrink-0 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-primary text-[18px]"
+                        data-icon="smart_toy">smart_toy</span>
+                </div>
+                <div class="bg-surface-container-low p-3 rounded-2xl rounded-tl-none shadow-sm">
+                    <p class="text-body-md text-on-surface">Halo! Saya asisten PharmaStock. Ada yang bisa saya bantu
+                        dengan inventaris Anda hari ini?</p>
+                    <span class="text-[10px] text-on-surface-variant mt-1 block">09:00 AM</span>
+                </div>
+            </div>
+            <!-- User Message Example -->
+            <div class="flex flex-row-reverse gap-3 max-w-[85%] ml-auto fade-in">
+                <div class="bg-primary text-on-primary p-3 rounded-2xl rounded-tr-none shadow-sm">
+                    <p class="text-body-md">Berapa sisa Paracetamol 500mg?</p>
+                    <span class="text-[10px] text-primary-fixed-dim mt-1 block text-right">09:01 AM</span>
+                </div>
+            </div>
+            <!-- AI Response with Shortcuts -->
+            <div class="flex gap-3 max-w-[90%] fade-in">
+                <div class="w-8 h-8 rounded-lg bg-primary flex-shrink-0 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-primary text-[18px]"
+                        data-icon="smart_toy">smart_toy</span>
+                </div>
+                <div class="space-y-3 w-full">
+                    <div
+                        class="bg-surface-container-low p-3 rounded-2xl rounded-tl-none shadow-sm border-l-4 border-primary">
+                        <p class="text-body-md text-on-surface">Stok <strong>Paracetamol 500mg</strong> saat ini tersisa
+                            <strong>12 box</strong>. </p>
+                        <p class="text-body-md text-on-surface mt-2">Ini berada di bawah ambang batas minimum (20 box).
+                            Apakah Anda ingin memesan ulang?</p>
+                        <span class="text-[10px] text-on-surface-variant mt-1 block">09:01 AM</span>
+                    </div>
+                    <!-- Action Buttons / Shortcuts -->
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            class="bg-primary-container text-on-primary-container px-4 py-2 rounded-xl text-body-md font-title-md flex items-center gap-2 transition-transform active:scale-95">
+                            <span class="material-symbols-outlined text-[18px]"
+                                data-icon="shopping_cart">shopping_cart</span>
+                            Pesan Ulang
+                        </button>
+                        <button
+                            class="bg-surface border border-border text-on-surface px-4 py-2 rounded-xl text-body-md font-title-md flex items-center gap-2 transition-transform active:scale-95">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="info">info</span>
+                            Lihat Detail
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- AI Expiry Check Response -->
+            <div class="flex gap-3 max-w-[90%] fade-in">
+                <div class="w-8 h-8 rounded-lg bg-primary flex-shrink-0 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-primary text-[18px]"
+                        data-icon="smart_toy">smart_toy</span>
+                </div>
+                <div class="space-y-3 w-full">
+                    <div
+                        class="bg-surface-container-low p-3 rounded-2xl rounded-tl-none shadow-sm border-l-4 border-error">
+                        <p class="text-body-md text-on-surface">Saya menemukan <strong>3 item</strong> yang akan
+                            kadaluwarsa dalam 30 hari ke depan:</p>
+                        <ul class="mt-2 space-y-1">
+                            <li class="flex justify-between text-body-md bg-white/50 p-2 rounded-lg">
+                                <span>Amoxicillin Syrup</span>
+                                <span class="text-error font-semibold">12 Mei 2024</span>
+                            </li>
+                            <li class="flex justify-between text-body-md bg-white/50 p-2 rounded-lg">
+                                <span>Vitamin C Tablet</span>
+                                <span class="text-error font-semibold">15 Mei 2024</span>
+                            </li>
+                        </ul>
+                        <span class="text-[10px] text-on-surface-variant mt-1 block">09:02 AM</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            class="bg-error text-on-error px-4 py-2 rounded-xl text-body-md font-title-md flex items-center gap-2 transition-transform active:scale-95">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+                            Retur Barang
+
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Input Bar -->
+    <div class="fixed bottom-16 left-0 w-full bg-surface p-container-padding pb-6 z-40 border-t border-border">
+        <div
+            class="max-w-xl mx-auto flex items-center gap-3 bg-surface-container-low border border-border rounded-full px-4 py-1">
+            <button class="text-on-surface-variant">
+                <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+            </button>
+            <input
+                class="flex-1 bg-transparent border-none focus:ring-0 text-body-md py-3 placeholder:text-outline h-touch-target"
+                placeholder="Tanya tentang stok..." type="text" />
+            <button
+                class="w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center transition-transform active:scale-90">
+                <span class="material-symbols-outlined" data-icon="send">send</span>
+            </button>
+        </div>
+    </div>
+    <!-- BottomNavBar -->
+    <nav class="fixed bottom-0 w-full z-50 bg-surface flex justify-around items-center h-16 px-2 shadow-sm">
+        <a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="font-label-md text-label-md">Dashboard</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+            <span class="font-label-md text-label-md">Scan</span>
+        </a>
+        <a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="chat_bubble"
+                style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+            <span class="font-label-md text-label-md">AI Chat</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+            <span class="font-label-md text-label-md">Inventory</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="font-label-md text-label-md">Profile</span>
+        </a>
+    </nav>
+    <script>
+        // Simple auto-scroll to bottom of chat
+        const chatWindow = document.getElementById('chat-window');
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Interaction for suggestions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (btn.textContent.includes('Paracetamol')) {
+                    console.log('User clicked suggestion');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
