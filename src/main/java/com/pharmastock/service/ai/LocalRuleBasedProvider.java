@@ -147,7 +147,7 @@ public class LocalRuleBasedProvider implements AIProvider {
                 if (med.getExpiryDate() != null) {
                     sb.append(String.format("Kadaluarsa   : %s\n", med.getExpiryDate()));
                     if (med.isExpired()) {
-                        sb.append("⚠️ PERINGATAN: Obat ini telah KADALUARSA!\n");
+                        sb.append("[PERINGATAN] Obat ini telah KADALUARSA!\n");
                     }
                 }
 
@@ -327,12 +327,12 @@ public class LocalRuleBasedProvider implements AIProvider {
         String advice = "";
 
         // Deteksi kondisi dengan prioritas (lebih spesifik didahulukan)
-        if (containsAny(query, "maag", "lambung", "asam lambung", "tukak")) {
+        if (containsAny(query, "maag", "lambung", "asam lambung", "tukak", "gastrointestinal")) {
             conditionName = "radang lambung/maag";
             advice = "Untuk radang lambung, HINDARI obat golongan NSAID (seperti Ibuprofen). Disarankan obat yang melindungi lambung.";
             for (Medicine med : allMeds) {
                 String cat = med.getCategory() != null ? med.getCategory().toLowerCase() : "";
-                if (containsAny(cat, "antasida", "lambung", "maag", "pencernaan")) {
+                if (containsAny(cat, "antasida", "lambung", "maag", "pencernaan", "gastrointestinal")) {
                     matched.add(med);
                 }
             }
@@ -417,8 +417,8 @@ public class LocalRuleBasedProvider implements AIProvider {
             StringBuilder sb = new StringBuilder();
             sb.append(advice).append("\n\n");
             for (Medicine med : matched) {
-                String status = med.getStockQuantity() == 0 ? "⚠️ HABIS" :
-                        (med.getStockQuantity() < med.getMinimumStock() ? "⚠️ Stok terbatas" : "✅ Tersedia");
+                String status = med.getStockQuantity() == 0 ? "[HABIS]" :
+                        (med.getStockQuantity() < med.getMinimumStock() ? "[Stok terbatas]" : "[Tersedia]");
                 sb.append(String.format("• **%s** (%s) - %s\n",
                         med.getMedicineName(), med.getCategory(), status));
                 if (med.getSellingPrice() != null) {

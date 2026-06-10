@@ -348,7 +348,10 @@ public class AIChatPanel extends BasePanel {
         ChatBubble bubble = new ChatBubble(message, time, false);
 
         // Check if query is looking for low stock reordering
-        if (message.toLowerCase().contains("reorder") || message.toLowerCase().contains("low stock") || message.toLowerCase().contains("stok")) {
+        if (message.toLowerCase().contains("reorder") || 
+            message.toLowerCase().contains("low stock") || 
+            message.toLowerCase().contains("stok kritis") || 
+            message.toLowerCase().contains("pemesanan ulang")) {
             JPanel cardContainer = buildSmartReorderCard();
             bubble.add(Box.createVerticalStrut(10));
             bubble.add(cardContainer);

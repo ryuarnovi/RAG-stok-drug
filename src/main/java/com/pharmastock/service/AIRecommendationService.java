@@ -6,6 +6,7 @@ import com.pharmastock.model.Medicine;
 import com.pharmastock.repository.IInventoryTransactionRepository;
 import com.pharmastock.repository.IMedicineRepository;
 import com.pharmastock.service.ai.AIProvider;
+import com.pharmastock.service.ai.LocalRuleBasedProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -216,22 +217,92 @@ public class AIRecommendationService {
             return "Silakan ajukan pertanyaan tentang inventaris apotek.";
         }
 
+        // Jika menggunakan provider AI eksternal (GEMINI / OPENAI)
+        if (!(aiProvider instanceof LocalRuleBasedProvider)) {
+            String systemPrompt = buildSystemPrompt();
+            String response = aiProvider.chat(systemPrompt, userMessage);
+            
+            // Jika sukses (tidak mengandung pesan error), kembalikan respon
+            if (response != null && !isError(response)) {
+                return removeEmojis(response);
+            }
+        }
+
+        // Fallback / LOCAL Mode: Jalankan Local Hybrid RAG Rules
         String lower = userMessage.toLowerCase().trim();
 
         // Priority 1: Inventory RAG
         String inventoryResult = handleInventoryRAG(lower, userMessage);
-        if (inventoryResult != null) return inventoryResult;
+        if (inventoryResult != null) return removeEmojis(inventoryResult);
 
         // Priority 2: Medical Knowledge Base
         String knowledgeResult = handleMedicalKnowledge(lower);
-        if (knowledgeResult != null) return knowledgeResult;
+        if (knowledgeResult != null) return removeEmojis(knowledgeResult);
 
         // Priority 3: Alternative Recommendation
         String altResult = handleAlternativeRecommendation(lower);
-        if (altResult != null) return altResult;
+        if (altResult != null) return removeEmojis(altResult);
 
         // Final: Symptom-based category recommendation
-        return handleCategorySuggestion(lower);
+        return removeEmojis(handleCategorySuggestion(lower));
+    }
+
+    private boolean isError(String response) {
+        if (response == null) return true;
+        String lower = response.toLowerCase();
+        return lower.contains("error") ||
+               lower.contains("gagal") ||
+               lower.contains("belum dikonfigurasi") ||
+               lower.contains("http ") ||
+               lower.contains("tidak ada respons") ||
+               lower.contains("diblokir") ||
+               lower.contains("invalid") ||
+               lower.contains("unauthorized") ||
+               lower.contains("forbidden") ||
+               lower.contains("not found") ||
+               lower.contains("rate limit");
+    }
+
+    private String buildSystemPrompt() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Anda adalah asisten AI PharmaStock yang profesional dan ramah untuk mengelola inventaris apotek.\n");
+        sb.append("Anda harus menjawab pertanyaan pengguna menggunakan data inventaris riil di bawah ini.\n\n");
+
+        sb.append("--- ATURAN PENTING ---\n");
+        sb.append("1. Jawablah dalam Bahasa Indonesia yang baik dan profesional.\n");
+        sb.append("2. HILANGKAN SEMUA EMOJI dalam respons Anda. Jangan gunakan emoji seperti ⚠️, ✅, ⛔, dll. Gunakan penanda teks seperti [PENTING] atau [HABIS] jika perlu.\n");
+        sb.append("3. Jika pengguna menanyakan obat yang tidak terdaftar, sebutkan bahwa obat tersebut tidak ada di inventaris dan tawarkan alternatif yang masuk akal dari daftar obat yang tersedia.\n");
+        sb.append("4. Selalu ingatkan pengguna untuk memverifikasi pesanan obat secara manual.\n\n");
+
+        sb.append("--- DATA INVENTARIS SEKARANG ---\n");
+        List<Medicine> allMeds = medicineRepo.findAll();
+        if (allMeds.isEmpty()) {
+            sb.append("Tidak ada obat yang terdaftar di inventaris.\n");
+        } else {
+            for (Medicine med : allMeds) {
+                sb.append(String.format("- Nama: %s | Kode: %s | Kategori: %s | Stok: %d %s | Stok Minimum: %d | Kadaluarsa: %s | Supplier: %s | Harga Jual: Rp%,.0f\n",
+                        med.getMedicineName(), med.getMedicineCode(), med.getCategory(),
+                        med.getStockQuantity(), med.getUnit(), med.getMinimumStock(),
+                        med.getExpiryDate() != null ? med.getExpiryDate().toString() : "N/A",
+                        med.getSupplierName() != null ? med.getSupplierName() : "N/A",
+                        med.getSellingPrice() != null ? med.getSellingPrice().doubleValue() : 0.0));
+            }
+        }
+
+        int lowStockCount = medicineRepo.countLowStock();
+        int expiredCount = medicineRepo.countExpired();
+        sb.append(String.format("\nRingkasan: Stok Rendah/Kritis (%d jenis obat), Kadaluarsa (%d jenis obat).\n",
+                lowStockCount, expiredCount));
+
+        return sb.toString();
+    }
+
+    private String removeEmojis(String text) {
+        if (text == null) return null;
+        return text.replaceAll("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF\\u2600-\\u27BF\\u2300-\\u23FF\\u2B50\\u2B06\\u2194\\u2B05\\u2B07\\u2b55]", "")
+                   .replaceAll("⚠️", "")
+                   .replaceAll("⛔", "")
+                   .replaceAll("✅", "");
     }
 
     private String handleInventoryRAG(String lower, String originalMessage) {
@@ -262,8 +333,8 @@ public class AIRecommendationService {
 
         result.append("Data inventaris yang relevan:\n\n");
         for (Medicine med : relevant) {
-            String status = med.getStockQuantity() == 0 ? "⚠️ HABIS" :
-                    (med.getStockQuantity() < med.getMinimumStock() ? "⚠️ Stok terbatas" : "✅ Tersedia");
+            String status = med.getStockQuantity() == 0 ? "[HABIS]" :
+                    (med.getStockQuantity() < med.getMinimumStock() ? "[Stok terbatas]" : "[Tersedia]");
             result.append(String.format("• %s (%s) - %s\n  Stok: %d %s",
                     med.getMedicineName(), med.getCategory(), status,
                     med.getStockQuantity(), med.getUnit()));
@@ -301,7 +372,7 @@ public class AIRecommendationService {
         }
         if (med.getExpiryDate() != null) {
             sb.append(String.format("Kadaluarsa   : %s", med.getExpiryDate()));
-            if (med.isExpired()) sb.append(" (⚠️ SUDAH KADALUARSA)");
+            if (med.isExpired()) sb.append(" (SUDAH KADALUARSA)");
             sb.append("\n");
         }
         if (med.getBatchNumber() != null) {
@@ -322,9 +393,9 @@ public class AIRecommendationService {
         }
 
         if (med.isLowStock() && med.getStockQuantity() > 0) {
-            sb.append("\n⚠️ Stok menipis, disarankan segera melakukan pemesanan ulang.");
+            sb.append("\nStok menipis, disarankan segera melakukan pemesanan ulang.");
         } else if (med.getStockQuantity() == 0) {
-            sb.append("\n⛔ Stok habis, silakan hubungi supplier.");
+            sb.append("\nStok habis, silakan hubungi supplier.");
         }
 
         return sb.toString();
@@ -434,8 +505,8 @@ public class AIRecommendationService {
         if (!inventoryAlts.isEmpty()) {
             sb.append("\nAlternatif yang tersedia di inventaris:\n");
             for (Medicine alt : inventoryAlts) {
-                String status = alt.getStockQuantity() == 0 ? "⚠️ HABIS" :
-                        (alt.getStockQuantity() < alt.getMinimumStock() ? "⚠️ Stok terbatas" : "✅ Tersedia");
+                String status = alt.getStockQuantity() == 0 ? "[HABIS]" :
+                        (alt.getStockQuantity() < alt.getMinimumStock() ? "[Stok terbatas]" : "[Tersedia]");
                 sb.append(String.format("  • %s - %s | Stok: %d %s\n",
                         alt.getMedicineName(), status, alt.getStockQuantity(), alt.getUnit()));
             }
@@ -447,7 +518,7 @@ public class AIRecommendationService {
             }
         }
 
-        sb.append("\n⚠️ Silakan konsultasikan dengan tenaga kesehatan sebelum mengganti obat.");
+        sb.append("\nSilakan konsultasikan dengan tenaga kesehatan sebelum mengganti obat.");
         sb.append("\n\nSumber: ✓ Medical Knowledge Base ✓ Recommendation Engine");
         return sb.toString();
     }
@@ -523,7 +594,7 @@ public class AIRecommendationService {
                 if (!wordSearch.isEmpty()) return wordSearch;
             }
         }
-        return allMeds;
+        return new ArrayList<>();
     }
 
     private boolean containsAny(String text, String... keywords) {
