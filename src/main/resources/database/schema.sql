@@ -1,38 +1,88 @@
--- PharmaStock Database Schema
--- MySQL 8+
+-- KEPO Database Schema (PostgreSQL)
 
-CREATE DATABASE IF NOT EXISTS pharmastock
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE pharmastock;
+DROP TABLE IF EXISTS audit_logs CASCADE;
+DROP TABLE IF EXISTS inventory_transactions CASCADE;
+DROP TABLE IF EXISTS distributions CASCADE;
+DROP TABLE IF EXISTS medicines CASCADE;
+DROP TABLE IF EXISTS refugees CASCADE;
+DROP TABLE IF EXISTS shelters CASCADE;
+DROP TABLE IF EXISTS events CASCADE;
+DROP TABLE IF EXISTS suppliers CASCADE;
+DROP TABLE IF EXISTS donors CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 -- Users table
-CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL DEFAULT '',
-    role ENUM('ADMIN', 'PHARMACIST', 'STAFF') NOT NULL DEFAULT 'STAFF',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+    role VARCHAR(30) NOT NULL DEFAULT 'SHELTER_OFFICER', -- ADMIN, HEALTH_OFFICER, SHELTER_OFFICER
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Events table
+CREATE TABLE events (
+    event_id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', -- ACTIVE, CLOSED
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Shelters table
+CREATE TABLE shelters (
+    shelter_id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    capacity INT NOT NULL DEFAULT 0,
+    current_occupancy INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'AMAN', -- AMAN, WASPADA, KRITIS
+    penanggung_jawab VARCHAR(100) NOT NULL DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Refugees table
+CREATE TABLE refugees (
+    refugee_id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    nik VARCHAR(30) NOT NULL UNIQUE,
+    age INT NOT NULL DEFAULT 0,
+    gender VARCHAR(20) NOT NULL, -- Laki-laki, Perempuan
+    status VARCHAR(20) NOT NULL DEFAULT 'CHECKED_IN', -- CHECKED_IN, CHECKED_OUT
+    medical_notes TEXT,
+    shelter_id INT REFERENCES shelters(shelter_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    check_in_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    check_out_time TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Suppliers table
-CREATE TABLE IF NOT EXISTS suppliers (
-    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE suppliers (
+    supplier_id SERIAL PRIMARY KEY,
     supplier_name VARCHAR(150) NOT NULL,
     contact_person VARCHAR(100),
     phone VARCHAR(20),
     email VARCHAR(100),
     address TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Donors table
+CREATE TABLE donors (
+    donor_id SERIAL PRIMARY KEY,
+    donor_name VARCHAR(150) NOT NULL,
+    contact VARCHAR(100),
+    phone VARCHAR(20),
+    email VARCHAR(100),
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Medicines table
-CREATE TABLE IF NOT EXISTS medicines (
-    medicine_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE medicines (
+    medicine_id SERIAL PRIMARY KEY,
     medicine_code VARCHAR(30) NOT NULL UNIQUE,
     medicine_name VARCHAR(200) NOT NULL,
     category VARCHAR(50) NOT NULL,
@@ -43,30 +93,44 @@ CREATE TABLE IF NOT EXISTS medicines (
     purchase_price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     selling_price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     expiry_date DATE,
-    supplier_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_medicine_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB;
+    supplier_id INT REFERENCES suppliers(supplier_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE INDEX idx_medicine_code ON medicines(medicine_code);
-CREATE INDEX idx_medicine_category ON medicines(category);
-CREATE INDEX idx_medicine_expiry ON medicines(expiry_date);
-CREATE INDEX idx_medicine_supplier ON medicines(supplier_id);
+-- Distributions table
+CREATE TABLE distributions (
+    distribution_id SERIAL PRIMARY KEY,
+    doc_num VARCHAR(50) NOT NULL UNIQUE,
+    shelter_id INT REFERENCES shelters(shelter_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    item_type VARCHAR(50) NOT NULL, -- OBAT, LOGISTIK, MAKANAN, PAKAIAN
+    quantity INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT', -- DRAFT, APPROVED, SHIPPED, RECEIVED
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- Inventory Transactions table
-CREATE TABLE IF NOT EXISTS inventory_transactions (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    medicine_id INT NOT NULL,
-    transaction_type ENUM('IN', 'OUT', 'ADJUSTMENT') NOT NULL,
+-- Inventory Transactions table (mainly for medicine stock logs)
+CREATE TABLE inventory_transactions (
+    transaction_id SERIAL PRIMARY KEY,
+    medicine_id INT NOT NULL REFERENCES medicines(medicine_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    transaction_type VARCHAR(20) NOT NULL, -- IN, OUT, ADJUSTMENT
     quantity INT NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    CONSTRAINT fk_it_medicine FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+    notes TEXT
+);
 
+-- Audit Logs table
+CREATE TABLE audit_logs (
+    log_id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    action VARCHAR(255) NOT NULL,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_refugee_nik ON refugees(nik);
+CREATE INDEX idx_refugee_shelter ON refugees(shelter_id);
+CREATE INDEX idx_medicine_code ON medicines(medicine_code);
+CREATE INDEX idx_medicine_expiry ON medicines(expiry_date);
+CREATE INDEX idx_distribution_doc ON distributions(doc_num);
 CREATE INDEX idx_it_medicine ON inventory_transactions(medicine_id);
-CREATE INDEX idx_it_date ON inventory_transactions(transaction_date);
-CREATE INDEX idx_it_type ON inventory_transactions(transaction_type);

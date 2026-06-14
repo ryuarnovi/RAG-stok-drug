@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.pharmastock</groupId>
-  <artifactId>pharmastock</artifactId>
-  <name>PharmaStock</name>
-  <version>1.0.0</version>
-  <description>Enterprise Pharmacy Stock Management System</description>
+  <groupId>com.kepo</groupId>
+  <artifactId>kepo</artifactId>
+  <name>KEPO</name>
+  <version>2.0.0</version>
+  <description>Kendali Evakuasi dan Pengelolaan Operasional Bencana</description>
   <build>
     <plugins>
       <plugin>
@@ -22,7 +22,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.pharmastock.PharmaStockApp</mainClass>
+              <mainClass>com.kepo.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -39,7 +39,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.pharmastock.PharmaStockApp</mainClass>
+                  <mainClass>com.kepo.Main</mainClass>
                 </transformer>
               </transformers>
               <filters>
@@ -60,6 +60,7 @@
   </build>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21.0.2</javafx.version>
     <maven.compiler.target>21</maven.compiler.target>
     <maven.compiler.source>21</maven.compiler.source>
   </properties>
