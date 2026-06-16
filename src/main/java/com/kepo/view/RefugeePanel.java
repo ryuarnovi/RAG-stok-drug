@@ -2,11 +2,13 @@ package com.kepo.view;
 
 import com.kepo.model.Refugee;
 import com.kepo.model.Shelter;
+import com.kepo.controller.RefugeeShelterController;
 import com.kepo.service.RefugeeService;
 import com.kepo.service.ShelterService;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -20,6 +22,7 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
 
     private final RefugeeService refugeeService;
     private final ShelterService shelterService;
+    private final RefugeeShelterController refugeeShelterController;
     private final MainLayout mainLayout;
 
     private FlowPane cardsGrid;
@@ -31,6 +34,8 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
     private ComboBox<String> genderCombo;
     private ComboBox<Shelter> shelterCombo;
     private ComboBox<String> statusCombo;
+    private ComboBox<String> priorityCombo;
+    private TextField familyCodeField;
     private TextArea medicalNotesArea;
     private Label errorLabel;
 
@@ -38,15 +43,22 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
     private Button checkOutBtn;
     private Button deleteBtn;
 
+    // Transfer & History sub-components
+    private VBox transferSection;
+    private ComboBox<Shelter> transferShelterCombo;
+    private TextArea transferNotesArea;
+    private VBox historySection;
+
     // Side Drawer Simulation
     private VBox drawer;
     private Label drawerTitle;
 
     private Refugee selectedRefugee;
 
-    public RefugeePanel(RefugeeService refugeeService, ShelterService shelterService, MainLayout mainLayout) {
+    public RefugeePanel(RefugeeService refugeeService, ShelterService shelterService, RefugeeShelterController refugeeShelterController, MainLayout mainLayout) {
         this.refugeeService = refugeeService;
         this.shelterService = shelterService;
+        this.refugeeShelterController = refugeeShelterController;
         this.mainLayout = mainLayout;
 
         initUI();
@@ -98,7 +110,7 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
 
         // Right Drawer Panel
         drawer = new VBox(12);
-        drawer.setPrefWidth(350);
+        drawer.setPrefWidth(380);
         drawer.setPadding(new Insets(20));
         drawer.setStyle(ThemeConstants.CARD_STYLE);
 
@@ -110,7 +122,7 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         scrollContent.setStyle("-fx-background-color: transparent;");
 
         drawerTitle = new Label("Registrasi / Check-In");
-        drawerTitle.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 15));
+        drawerTitle.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 16));
         drawerTitle.setTextFill(Color.web(ThemeConstants.ON_SURFACE));
 
         nameField = new TextField();
@@ -139,9 +151,18 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         statusCombo.setMaxWidth(Double.MAX_VALUE);
         statusCombo.setStyle(ThemeConstants.INPUT_STYLE);
 
+        priorityCombo = new ComboBox<>(FXCollections.observableArrayList("REGULAR", "BALITA", "LANSIA", "IBU_HAMIL", "DISABILITAS", "SICK"));
+        priorityCombo.setValue("REGULAR");
+        priorityCombo.setMaxWidth(Double.MAX_VALUE);
+        priorityCombo.setStyle(ThemeConstants.INPUT_STYLE);
+
+        familyCodeField = new TextField();
+        familyCodeField.setPromptText("Kode Keluarga (opsional, misal: FAM-001)");
+        familyCodeField.setStyle(ThemeConstants.INPUT_STYLE);
+
         medicalNotesArea = new TextArea();
         medicalNotesArea.setPromptText("Catatan keluhan medis pengungsi (ISPA, luka bakar, riwayat penyakit)...");
-        medicalNotesArea.setPrefHeight(70);
+        medicalNotesArea.setPrefHeight(60);
         medicalNotesArea.setWrapText(true);
         medicalNotesArea.setStyle(ThemeConstants.INPUT_STYLE);
 
@@ -172,19 +193,58 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         checkOutBtn.setOnAction(e -> handleCheckOutStatus());
         btnRow2.getChildren().addAll(checkInBtn, checkOutBtn);
 
+        // --- Transfer Section ---
+        transferSection = new VBox(8);
+        transferSection.setPadding(new Insets(10, 0, 0, 0));
+        Label transferTitle = new Label("Pindahkan ke Shelter Lain");
+        transferTitle.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 13));
+        transferTitle.setTextFill(Color.web(ThemeConstants.PRIMARY));
+
+        transferShelterCombo = new ComboBox<>();
+        transferShelterCombo.setMaxWidth(Double.MAX_VALUE);
+        transferShelterCombo.setStyle(ThemeConstants.INPUT_STYLE);
+
+        transferNotesArea = new TextArea();
+        transferNotesArea.setPromptText("Alasan pemindahan...");
+        transferNotesArea.setPrefHeight(50);
+        transferNotesArea.setWrapText(true);
+        transferNotesArea.setStyle(ThemeConstants.INPUT_STYLE);
+
+        Button executeTransferBtn = new Button("Proses Pemindahan");
+        executeTransferBtn.setStyle(ThemeConstants.SECONDARY_BTN_STYLE);
+        executeTransferBtn.setMaxWidth(Double.MAX_VALUE);
+        executeTransferBtn.setOnAction(e -> handleTransfer());
+
+        transferSection.getChildren().addAll(transferTitle, transferShelterCombo, transferNotesArea, executeTransferBtn);
+
+        // --- History Section ---
+        historySection = new VBox(6);
+        historySection.setPadding(new Insets(10, 0, 0, 0));
+        Label historyTitle = new Label("Riwayat Perpindahan");
+        historyTitle.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 13));
+        historyTitle.setTextFill(Color.web(ThemeConstants.ON_SURFACE));
+
+        historySection.getChildren().addAll(historyTitle);
+
         scrollContent.getChildren().addAll(
                 drawerTitle,
                 createFormLabel("Nama Pengungsi"), nameField,
                 createFormLabel("NIK"), nikField,
                 createFormLabel("Usia"), ageField,
                 createFormLabel("Gender"), genderCombo,
+                createFormLabel("Kelompok Prioritas"), priorityCombo,
+                createFormLabel("Kode Keluarga"), familyCodeField,
                 createFormLabel("Pilih Shelter"), shelterCombo,
                 createFormLabel("Status"), statusCombo,
                 createFormLabel("Catatan Medis"), medicalNotesArea,
                 errorLabel,
                 btnRow1,
                 new Separator(),
-                btnRow2
+                btnRow2,
+                new Separator(),
+                transferSection,
+                new Separator(),
+                historySection
         );
 
         formScroll.setContent(scrollContent);
@@ -200,7 +260,7 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
 
     private Label createFormLabel(String text) {
         Label label = new Label(text);
-        label.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-weight: bold; -fx-font-size: 12px;");
+        label.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-weight: bold; -fx-font-size: 11px;");
         return label;
     }
 
@@ -217,53 +277,65 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         }
 
         for (Refugee r : list) {
-            VBox card = new VBox(10);
-            card.setPrefWidth(240);
+            VBox card = new VBox(8);
+            card.setPrefWidth(250);
             card.setPadding(new Insets(16));
             card.setStyle(ThemeConstants.CARD_STYLE);
 
             // Name
             Label nameLabel = new Label(r.getName());
-            nameLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE + "; -fx-font-weight: bold; -fx-font-size: 15px;");
+            nameLabel.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 15));
+            nameLabel.setTextFill(Color.web(ThemeConstants.ON_SURFACE));
             nameLabel.setWrapText(true);
-            nameLabel.setMaxWidth(208);
-            nameLabel.setPrefWidth(208);
-
-            // NIK
-            Label nikLabel = new Label("NIK: " + r.getNik());
-            nikLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px;");
+            nameLabel.setMaxWidth(218);
 
             // Gender & Age
             Label infoLabel = new Label(r.getGender() + ", " + r.getAge() + " tahun");
             infoLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 12px;");
 
+            // NIK & Family Code
+            String famStr = (r.getFamilyCode() != null && !r.getFamilyCode().isBlank()) ? " | Kel: " + r.getFamilyCode() : "";
+            Label nikLabel = new Label("NIK: " + r.getNik() + famStr);
+            nikLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px;");
+
             // Posko / Shelter
             Label shelterLabel = new Label("Posko: " + (r.getShelterName() != null ? r.getShelterName() : "-"));
             shelterLabel.setStyle("-fx-text-fill: " + ThemeConstants.PRIMARY + "; -fx-font-weight: bold; -fx-font-size: 11px;");
             shelterLabel.setWrapText(true);
-            shelterLabel.setMaxWidth(208);
-            shelterLabel.setPrefWidth(208);
 
             // Notes
             String notesStr = r.getMedicalNotes() != null && !r.getMedicalNotes().isBlank() ? r.getMedicalNotes() : "Tidak ada keluhan medis.";
             Label notesLabel = new Label("Medis: " + notesStr);
             notesLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px;");
             notesLabel.setWrapText(true);
-            notesLabel.setMaxWidth(208);
-            notesLabel.setPrefWidth(208);
+
+            // Badges Row
+            HBox badgeRow = new HBox(6);
+            badgeRow.setAlignment(Pos.CENTER_LEFT);
 
             // Status Badge
-            Label badge = new Label();
+            Label statusBadge = new Label();
             if ("CHECKED_IN".equals(r.getStatus())) {
-                badge.setText("CHECKED IN");
-                badge.setStyle(ThemeConstants.BADGE_SAFE);
+                statusBadge.setText("CHECKED IN");
+                statusBadge.setStyle(ThemeConstants.BADGE_SAFE);
             } else {
-                badge.setText("CHECKED OUT");
-                badge.setStyle(ThemeConstants.BADGE_CLOSED);
+                statusBadge.setText("CHECKED OUT");
+                statusBadge.setStyle(ThemeConstants.BADGE_CLOSED);
             }
+            badgeRow.getChildren().add(statusBadge);
 
-            HBox badgeRow = new HBox(badge);
-            badgeRow.setAlignment(Pos.CENTER_LEFT);
+            // Priority Badge
+            if (r.getPriorityStatus() != null && !r.getPriorityStatus().equals("REGULAR")) {
+                Label prioBadge = new Label(r.getPriorityStatus());
+                if ("SICK".equals(r.getPriorityStatus()) || "DISABILITAS".equals(r.getPriorityStatus())) {
+                    prioBadge.setStyle(ThemeConstants.BADGE_CRITICAL);
+                } else if ("LANSIA".equals(r.getPriorityStatus()) || "IBU_HAMIL".equals(r.getPriorityStatus())) {
+                    prioBadge.setStyle(ThemeConstants.BADGE_WARNING);
+                } else {
+                    prioBadge.setStyle(ThemeConstants.BADGE_ACTIVE);
+                }
+                badgeRow.getChildren().add(prioBadge);
+            }
 
             // Details action button
             Button detailsBtn = new Button("Detail");
@@ -273,7 +345,7 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
             HBox footer = new HBox(detailsBtn);
             footer.setAlignment(Pos.CENTER_RIGHT);
 
-            card.getChildren().addAll(nameLabel, nikLabel, infoLabel, shelterLabel, notesLabel, badgeRow, footer);
+            card.getChildren().addAll(nameLabel, infoLabel, nikLabel, shelterLabel, notesLabel, badgeRow, footer);
             cardsGrid.getChildren().add(card);
         }
     }
@@ -288,12 +360,19 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         genderCombo.setValue("Laki-laki");
         shelterCombo.setValue(null);
         statusCombo.setValue("CHECKED_IN");
+        priorityCombo.setValue("REGULAR");
+        familyCodeField.clear();
         medicalNotesArea.clear();
 
         checkInBtn.setDisable(true);
         checkOutBtn.setDisable(true);
         deleteBtn.setVisible(false);
         errorLabel.setText("");
+
+        transferSection.setVisible(false);
+        transferSection.setManaged(false);
+        historySection.setVisible(false);
+        historySection.setManaged(false);
 
         drawer.setVisible(true);
         drawer.setManaged(true);
@@ -308,6 +387,8 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         ageField.setText(String.valueOf(r.getAge()));
         genderCombo.setValue(r.getGender());
         statusCombo.setValue(r.getStatus());
+        priorityCombo.setValue(r.getPriorityStatus() != null ? r.getPriorityStatus() : "REGULAR");
+        familyCodeField.setText(r.getFamilyCode() != null ? r.getFamilyCode() : "");
         medicalNotesArea.setText(r.getMedicalNotes());
 
         // Set shelter combo
@@ -327,8 +408,58 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         deleteBtn.setVisible(true);
         errorLabel.setText("");
 
+        // Setup transfer controls
+        boolean canTransfer = "CHECKED_IN".equals(r.getStatus());
+        transferSection.setVisible(canTransfer);
+        transferSection.setManaged(canTransfer);
+        transferNotesArea.clear();
+        if (canTransfer) {
+            List<Shelter> shelters = shelterService.getAllShelters();
+            transferShelterCombo.setItems(FXCollections.observableArrayList(shelters));
+            if (r.getShelterId() != null) {
+                for (Shelter s : transferShelterCombo.getItems()) {
+                    if (s.getShelterId() == r.getShelterId()) {
+                        transferShelterCombo.setValue(s);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Load history logs
+        historySection.setVisible(true);
+        historySection.setManaged(true);
+        refreshHistoryList(r.getRefugeeId());
+
         drawer.setVisible(true);
         drawer.setManaged(true);
+    }
+
+    private void refreshHistoryList(int refugeeId) {
+        // Clear all except the title label
+        Node titleLabel = historySection.getChildren().get(0);
+        historySection.getChildren().clear();
+        historySection.getChildren().add(titleLabel);
+
+        List<com.kepo.model.RefugeeMovement> history = refugeeShelterController.getMovementHistory(refugeeId);
+        if (history.isEmpty()) {
+            Label emptyLbl = new Label("Belum ada riwayat pemindahan.");
+            emptyLbl.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-style: italic; -fx-font-size: 11px;");
+            historySection.getChildren().add(emptyLbl);
+        } else {
+            for (com.kepo.model.RefugeeMovement m : history) {
+                String from = m.getFromShelterName() != null ? m.getFromShelterName() : "Registrasi Awal";
+                String to = m.getToShelterName() != null ? m.getToShelterName() : "Check-Out";
+                String text = String.format("- %s -> %s\n  Oleh: %s pada %s\n  Catatan: %s", 
+                        from, to, m.getMovedBy(), m.getMovedAt().toString().substring(0, 16), 
+                        (m.getNotes() != null && !m.getNotes().isBlank() ? m.getNotes() : "-"));
+                
+                Label logLabel = new Label(text);
+                logLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px;");
+                logLabel.setWrapText(true);
+                historySection.getChildren().add(logLabel);
+            }
+        }
     }
 
     private void closeDrawer() {
@@ -344,6 +475,8 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         String gender = genderCombo.getValue();
         Shelter shelter = shelterCombo.getValue();
         String status = statusCombo.getValue();
+        String priority = priorityCombo.getValue();
+        String familyCode = familyCodeField.getText().trim();
         String notes = medicalNotesArea.getText().trim();
 
         if (name.isEmpty() || nik.isEmpty() || ageStr.isEmpty() || shelter == null) {
@@ -369,6 +502,8 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
         r.setGender(gender);
         r.setShelterId(shelter.getShelterId());
         r.setStatus(status);
+        r.setPriorityStatus(priority);
+        r.setFamilyCode(familyCode);
         r.setMedicalNotes(notes);
 
         if (refugeeService.saveRefugee(r)) {
@@ -407,6 +542,25 @@ public class RefugeePanel extends VBox implements RefreshablePanel {
             refreshData();
         } else {
             errorLabel.setText("Gagal memproses Check-Out.");
+        }
+    }
+
+    private void handleTransfer() {
+        if (selectedRefugee == null) {
+            errorLabel.setText("Pilih pengungsi terlebih dahulu.");
+            return;
+        }
+        Shelter target = transferShelterCombo.getValue();
+        if (target == null) {
+            errorLabel.setText("Pilih shelter tujuan transfer.");
+            return;
+        }
+        String notes = transferNotesArea.getText().trim();
+        if (refugeeShelterController.transferRefugee(selectedRefugee.getRefugeeId(), target.getShelterId(), notes)) {
+            closeDrawer();
+            refreshData();
+        } else {
+            errorLabel.setText("Gagal memindahkan shelter pengungsi.");
         }
     }
 

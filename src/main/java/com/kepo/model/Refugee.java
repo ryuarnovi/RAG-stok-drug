@@ -10,6 +10,8 @@ public class Refugee {
     private String gender; // Laki-laki, Perempuan
     private String status; // CHECKED_IN, CHECKED_OUT
     private String medicalNotes;
+    private String priorityStatus; // REGULAR, BALITA, LANSIA, IBU_HAMIL, DISABILITAS, SICK
+    private String familyCode;
     private Integer shelterId;
     private Timestamp checkInTime;
     private Timestamp checkOutTime;
@@ -20,7 +22,7 @@ public class Refugee {
 
     public Refugee() {}
 
-    public Refugee(int refugeeId, String name, String nik, int age, String gender, String status, String medicalNotes, Integer shelterId, Timestamp checkInTime, Timestamp checkOutTime, Timestamp createdAt) {
+    public Refugee(int refugeeId, String name, String nik, int age, String gender, String status, String medicalNotes, String priorityStatus, String familyCode, Integer shelterId, Timestamp checkInTime, Timestamp checkOutTime, Timestamp createdAt) {
         this.refugeeId = refugeeId;
         this.name = name;
         this.nik = nik;
@@ -28,6 +30,8 @@ public class Refugee {
         this.gender = gender;
         this.status = status;
         this.medicalNotes = medicalNotes;
+        this.priorityStatus = priorityStatus;
+        this.familyCode = familyCode;
         this.shelterId = shelterId;
         this.checkInTime = checkInTime;
         this.checkOutTime = checkOutTime;
@@ -54,6 +58,12 @@ public class Refugee {
 
     public String getMedicalNotes() { return medicalNotes; }
     public void setMedicalNotes(String medicalNotes) { this.medicalNotes = medicalNotes; }
+
+    public String getPriorityStatus() { return priorityStatus; }
+    public void setPriorityStatus(String priorityStatus) { this.priorityStatus = priorityStatus; }
+
+    public String getFamilyCode() { return familyCode; }
+    public void setFamilyCode(String familyCode) { this.familyCode = familyCode; }
 
     public Integer getShelterId() { return shelterId; }
     public void setShelterId(Integer shelterId) { this.shelterId = shelterId; }

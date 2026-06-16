@@ -41,6 +41,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
     private TextField locationField;
     private ComboBox<String> statusCombo;
     private TextArea descArea;
+    private TextField shelterCountField;
     private Label errorLabel;
     private Button deleteBtn;
 
@@ -148,6 +149,10 @@ public class EventPanel extends VBox implements RefreshablePanel {
         descArea.setWrapText(true);
         descArea.setStyle(ThemeConstants.INPUT_STYLE);
 
+        shelterCountField = new TextField();
+        shelterCountField.setPromptText("Jumlah shelter terlibat");
+        shelterCountField.setStyle(ThemeConstants.INPUT_STYLE);
+
         errorLabel = new Label();
         errorLabel.setTextFill(Color.web(ThemeConstants.DANGER));
 
@@ -172,6 +177,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
                 createFormLabel("Lokasi"), locationField,
                 createFormLabel("Status"), statusCombo,
                 createFormLabel("Deskripsi"), descArea,
+                createFormLabel("Jumlah Shelter"), shelterCountField,
                 errorLabel,
                 btnRow
         );
@@ -262,12 +268,6 @@ public class EventPanel extends VBox implements RefreshablePanel {
                 statusBadge.setStyle(ThemeConstants.BADGE_CLOSED);
             }
 
-            // Relationship stats based on location overlap
-            long shelterCount = allShelters.stream().filter(s -> 
-                s.getLocation().toLowerCase().contains(e.getLocation().toLowerCase()) || 
-                e.getLocation().toLowerCase().contains(s.getLocation().toLowerCase())
-            ).count();
-
             long refugeeCount = allRefugees.stream().filter(r -> 
                 "CHECKED_IN".equals(r.getStatus()) && allShelters.stream().anyMatch(s -> 
                     s.getShelterId() == r.getShelterId() && (
@@ -278,7 +278,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
             ).count();
 
             HBox statsRow = new HBox(15);
-            Label shLabel = new Label(shelterCount + " Shelter");
+            Label shLabel = new Label(e.getShelterCount() + " Shelter");
             shLabel.setStyle("-fx-text-fill: " + ThemeConstants.PRIMARY + "; -fx-font-weight: bold; -fx-font-size: 11px;");
 
             Label refLabel = new Label(refugeeCount + " Pengungsi");
@@ -306,6 +306,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
         locationField.clear();
         statusCombo.setValue("ACTIVE");
         descArea.clear();
+        shelterCountField.setText("0");
         errorLabel.setText("");
         deleteBtn.setVisible(false);
 
@@ -320,6 +321,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
         locationField.setText(e.getLocation());
         statusCombo.setValue(e.getStatus());
         descArea.setText(e.getDescription());
+        shelterCountField.setText(String.valueOf(e.getShelterCount()));
         errorLabel.setText("");
         deleteBtn.setVisible(true);
 
@@ -338,9 +340,24 @@ public class EventPanel extends VBox implements RefreshablePanel {
         String location = locationField.getText().trim();
         String status = statusCombo.getValue();
         String desc = descArea.getText().trim();
+        String shelterCountStr = shelterCountField.getText().trim();
 
         if (name.isEmpty() || location.isEmpty()) {
             errorLabel.setText("Nama dan lokasi wajib diisi.");
+            return;
+        }
+
+        int shelterCount = 0;
+        try {
+            if (!shelterCountStr.isEmpty()) {
+                shelterCount = Integer.parseInt(shelterCountStr);
+                if (shelterCount < 0) {
+                    errorLabel.setText("Jumlah shelter tidak boleh negatif.");
+                    return;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            errorLabel.setText("Jumlah shelter harus berupa angka.");
             return;
         }
 
@@ -352,6 +369,7 @@ public class EventPanel extends VBox implements RefreshablePanel {
         e.setLocation(location);
         e.setStatus(status);
         e.setDescription(desc);
+        e.setShelterCount(shelterCount);
 
         if (eventService.saveEvent(e)) {
             closeDrawer();

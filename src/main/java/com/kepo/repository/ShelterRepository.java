@@ -17,7 +17,7 @@ public class ShelterRepository {
 
     public List<Shelter> findAll() {
         List<Shelter> list = new ArrayList<>();
-        String sql = "SELECT shelter_id, name, location, capacity, current_occupancy, status, penanggung_jawab, created_at FROM shelters ORDER BY name ASC";
+        String sql = "SELECT shelter_id, name, location, capacity, current_occupancy, status, penanggung_jawab, event_id, created_at FROM shelters ORDER BY name ASC";
         try (Connection conn = dbConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -31,7 +31,7 @@ public class ShelterRepository {
     }
 
     public Shelter findById(int shelterId) {
-        String sql = "SELECT shelter_id, name, location, capacity, current_occupancy, status, penanggung_jawab, created_at FROM shelters WHERE shelter_id = ?";
+        String sql = "SELECT shelter_id, name, location, capacity, current_occupancy, status, penanggung_jawab, event_id, created_at FROM shelters WHERE shelter_id = ?";
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, shelterId);
@@ -58,7 +58,7 @@ public class ShelterRepository {
         }
 
         if (shelter.getShelterId() > 0) {
-            String sql = "UPDATE shelters SET name = ?, location = ?, capacity = ?, current_occupancy = ?, status = ?, penanggung_jawab = ? WHERE shelter_id = ?";
+            String sql = "UPDATE shelters SET name = ?, location = ?, capacity = ?, current_occupancy = ?, status = ?, penanggung_jawab = ?, event_id = ? WHERE shelter_id = ?";
             try (Connection conn = dbConfig.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, shelter.getName());
@@ -67,13 +67,18 @@ public class ShelterRepository {
                 ps.setInt(4, shelter.getCurrentOccupancy());
                 ps.setString(5, shelter.getStatus());
                 ps.setString(6, shelter.getPenanggungJawab());
-                ps.setInt(7, shelter.getShelterId());
+                if (shelter.getEventId() != null) {
+                    ps.setInt(7, shelter.getEventId());
+                } else {
+                    ps.setNull(7, java.sql.Types.INTEGER);
+                }
+                ps.setInt(8, shelter.getShelterId());
                 return ps.executeUpdate() > 0;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         } else {
-            String sql = "INSERT INTO shelters (name, location, capacity, current_occupancy, status, penanggung_jawab) VALUES (?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO shelters (name, location, capacity, current_occupancy, status, penanggung_jawab, event_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (Connection conn = dbConfig.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, shelter.getName());
@@ -82,6 +87,11 @@ public class ShelterRepository {
                 ps.setInt(4, shelter.getCurrentOccupancy());
                 ps.setString(5, shelter.getStatus());
                 ps.setString(6, shelter.getPenanggungJawab());
+                if (shelter.getEventId() != null) {
+                    ps.setInt(7, shelter.getEventId());
+                } else {
+                    ps.setNull(7, java.sql.Types.INTEGER);
+                }
                 if (ps.executeUpdate() > 0) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
@@ -137,6 +147,12 @@ public class ShelterRepository {
         sh.setCurrentOccupancy(rs.getInt("current_occupancy"));
         sh.setStatus(rs.getString("status"));
         sh.setPenanggungJawab(rs.getString("penanggung_jawab"));
+        int eventId = rs.getInt("event_id");
+        if (rs.wasNull()) {
+            sh.setEventId(null);
+        } else {
+            sh.setEventId(eventId);
+        }
         sh.setCreatedAt(rs.getTimestamp("created_at"));
         return sh;
     }

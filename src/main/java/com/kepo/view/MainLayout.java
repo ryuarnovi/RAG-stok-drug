@@ -4,6 +4,7 @@ import com.kepo.KepoApp;
 import com.kepo.config.DatabaseConfig;
 import com.kepo.controller.DashboardController;
 import com.kepo.controller.InventoryController;
+import com.kepo.controller.RefugeeShelterController;
 import com.kepo.model.User;
 import com.kepo.repository.SupplierRepository;
 import com.kepo.service.*;
@@ -12,6 +13,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -32,6 +34,7 @@ public class MainLayout extends BorderPane {
     private final DonorService donorService;
     private final ReportService reportService;
     private final AIRecommendationService aiRecService;
+    private final RefugeeShelterController refugeeShelterController;
     private final KepoApp app;
 
     private VBox sidebarContainer;
@@ -44,12 +47,14 @@ public class MainLayout extends BorderPane {
     private Map<String, VBox> itemCategoryBoxes = new HashMap<>();
 
     public MainLayout(DashboardController dashboardController, InventoryController inventoryController,
+                      RefugeeShelterController refugeeShelterController,
                       UserService userService, EventService eventService, ShelterService shelterService,
                       RefugeeService refugeeService, DistributionService distributionService,
                       DonorService donorService, ReportService reportService,
                       AIRecommendationService aiRecService, KepoApp app) {
         this.dashboardController = dashboardController;
         this.inventoryController = inventoryController;
+        this.refugeeShelterController = refugeeShelterController;
         this.userService = userService;
         this.eventService = eventService;
         this.shelterService = shelterService;
@@ -96,11 +101,21 @@ public class MainLayout extends BorderPane {
         // --- Left Sidebar ---
         sidebarContainer = new VBox(5);
         sidebarContainer.setPadding(new Insets(15, 10, 15, 10));
-        sidebarContainer.setPrefWidth(220);
-        sidebarContainer.setStyle("-fx-background-color: " + ThemeConstants.SURFACE + "; -fx-border-color: " + ThemeConstants.BORDER + "; -fx-border-width: 0 1 0 0;");
+        sidebarContainer.setPrefWidth(210);
+        sidebarContainer.setStyle("-fx-background-color: " + ThemeConstants.SURFACE + ";");
 
         buildSidebarMenu();
-        setLeft(sidebarContainer);
+
+        ScrollPane sidebarScroll = new ScrollPane(sidebarContainer);
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sidebarScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        sidebarScroll.setStyle("-fx-background-color: " + ThemeConstants.SURFACE + ";" +
+                               "-fx-background: " + ThemeConstants.SURFACE + ";" +
+                               "-fx-border-color: " + ThemeConstants.BORDER + ";" +
+                               "-fx-border-width: 0 1 0 0;" +
+                               "-fx-padding: 0;");
+        setLeft(sidebarScroll);
 
         // --- Central Content Area ---
         contentArea = new StackPane();
@@ -156,16 +171,23 @@ public class MainLayout extends BorderPane {
         // Standalone Dashboard button
         addSidebarButton("dashboard", "Dashboard");
 
-        // Collapsible Categories
-        addCollapsibleCategory("OPERASI", 
-                new String[]{"event", "shelter", "refugee"}, 
-                new String[]{"Event Bencana", "Shelter", "Pengungsi"}
-        );
+        User currentUser = userService.getCurrentUser();
+        User.Role role = currentUser != null ? currentUser.getRole() : User.Role.SHELTER_OFFICER;
 
-        addCollapsibleCategory("LOGISTIK", 
-                new String[]{"medicine", "distribution", "supp_donor"}, 
-                new String[]{"Inventaris", "Distribusi", "Supplier"}
-        );
+        // Collapsible Categories
+        if (role == User.Role.ADMIN || role == User.Role.SHELTER_OFFICER) {
+            addCollapsibleCategory("OPERASI", 
+                    new String[]{"event", "shelter", "refugee"}, 
+                    new String[]{"Event Bencana", "Shelter", "Pengungsi"}
+            );
+        }
+
+        if (role == User.Role.ADMIN || role == User.Role.HEALTH_OFFICER) {
+            addCollapsibleCategory("LOGISTIK", 
+                    new String[]{"medicine", "distribution", "supp_donor"}, 
+                    new String[]{"Inventaris", "Distribusi", "Supplier"}
+            );
+        }
 
         addCollapsibleCategory("ANALISIS", 
                 new String[]{"ai", "prediction"}, 
@@ -287,9 +309,9 @@ public class MainLayout extends BorderPane {
             case "dashboard" -> new DashboardView(dashboardController, this);
             case "event" -> new EventPanel(eventService, this);
             case "shelter" -> new ShelterPanel(shelterService, this);
-            case "refugee" -> new RefugeePanel(refugeeService, shelterService, this);
+            case "refugee" -> new RefugeePanel(refugeeService, shelterService, refugeeShelterController, this);
             case "medicine" -> new MedicinePanel(inventoryController, supplierService(), this);
-            case "distribution" -> new DistributionPanel(distributionService, shelterService, inventoryController, this);
+            case "distribution" -> new DistributionPanel(distributionService, shelterService, inventoryController, refugeeShelterController, this);
             case "supp_donor" -> new SupplierDonorPanel(supplierService(), donorService, this);
             case "ai" -> new AIChatPanel(aiRecService, this);
             case "prediction" -> new PredictionPanel(aiRecService, this);

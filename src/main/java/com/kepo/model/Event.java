@@ -8,16 +8,18 @@ public class Event {
     private String location;
     private String status; // ACTIVE, CLOSED
     private String description;
+    private int shelterCount;
     private Timestamp createdAt;
 
     public Event() {}
 
-    public Event(int eventId, String name, String location, String status, String description, Timestamp createdAt) {
+    public Event(int eventId, String name, String location, String status, String description, int shelterCount, Timestamp createdAt) {
         this.eventId = eventId;
         this.name = name;
         this.location = location;
         this.status = status;
         this.description = description;
+        this.shelterCount = shelterCount;
         this.createdAt = createdAt;
     }
 
@@ -36,6 +38,14 @@ public class Event {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
+    public int getShelterCount() { return shelterCount; }
+    public void setShelterCount(int shelterCount) { this.shelterCount = shelterCount; }
+
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

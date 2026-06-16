@@ -11,6 +11,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class AIChatPanel extends VBox implements RefreshablePanel {
 
@@ -152,12 +154,9 @@ public class AIChatPanel extends VBox implements RefreshablePanel {
         senderLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
         senderLabel.setTextFill(Color.web(isUser ? ThemeConstants.PRIMARY_LIGHT : ThemeConstants.SECONDARY));
 
-        Label textLabel = new Label(text);
-        textLabel.setWrapText(true);
-        textLabel.setFont(Font.font("System", FontWeight.NORMAL, 13));
-        textLabel.setTextFill(Color.web(ThemeConstants.AI_TEXT));
+        TextFlow textFlow = createFormattedTextFlow(text);
 
-        bubble.getChildren().addAll(senderLabel, textLabel);
+        bubble.getChildren().addAll(senderLabel, textFlow);
 
         if (isUser) {
             bubble.setStyle("-fx-background-color: " + ThemeConstants.AI_SURFACE + ";" +
@@ -179,6 +178,81 @@ public class AIChatPanel extends VBox implements RefreshablePanel {
         chatScroll.setVvalue(1.0);
 
         return wrapper;
+    }
+
+    private TextFlow createFormattedTextFlow(String text) {
+        TextFlow textFlow = new TextFlow();
+        textFlow.setMaxWidth(560);
+        
+        String[] lines = text.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            
+            // Check if it is a bullet point list item
+            boolean isBullet = false;
+            if (line.trim().startsWith("* ")) {
+                isBullet = true;
+                line = line.trim().substring(2);
+                
+                Text bullet = new Text("  • ");
+                bullet.setFont(Font.font("Inter", FontWeight.BOLD, 13));
+                bullet.setFill(Color.web(ThemeConstants.AI_TEXT));
+                textFlow.getChildren().add(bullet);
+            } else if (line.trim().startsWith("- ")) {
+                isBullet = true;
+                line = line.trim().substring(2);
+                
+                Text bullet = new Text("  • ");
+                bullet.setFont(Font.font("Inter", FontWeight.BOLD, 13));
+                bullet.setFill(Color.web(ThemeConstants.AI_TEXT));
+                textFlow.getChildren().add(bullet);
+            }
+            
+            // Parse bold elements **bold** in the line
+            int idx = 0;
+            while (idx < line.length()) {
+                int start = line.indexOf("**", idx);
+                if (start == -1) {
+                    String normalText = line.substring(idx);
+                    Text textNode = new Text(normalText);
+                    textNode.setFont(Font.font("Inter", FontWeight.NORMAL, 13));
+                    textNode.setFill(Color.web(ThemeConstants.AI_TEXT));
+                    textFlow.getChildren().add(textNode);
+                    break;
+                } else {
+                    if (start > idx) {
+                        String normalText = line.substring(idx, start);
+                        Text textNode = new Text(normalText);
+                        textNode.setFont(Font.font("Inter", FontWeight.NORMAL, 13));
+                        textNode.setFill(Color.web(ThemeConstants.AI_TEXT));
+                        textFlow.getChildren().add(textNode);
+                    }
+                    
+                    int end = line.indexOf("**", start + 2);
+                    if (end == -1) {
+                        String normalText = line.substring(start);
+                        Text textNode = new Text(normalText);
+                        textNode.setFont(Font.font("Inter", FontWeight.NORMAL, 13));
+                        textNode.setFill(Color.web(ThemeConstants.AI_TEXT));
+                        textFlow.getChildren().add(textNode);
+                        break;
+                    } else {
+                        String boldText = line.substring(start + 2, end);
+                        Text textNode = new Text(boldText);
+                        textNode.setFont(Font.font("Inter", FontWeight.BOLD, 13));
+                        textNode.setFill(Color.web(ThemeConstants.AI_TEXT));
+                        textFlow.getChildren().add(textNode);
+                        idx = end + 2;
+                    }
+                }
+            }
+            
+            if (i < lines.length - 1) {
+                textFlow.getChildren().add(new Text("\n"));
+            }
+        }
+        
+        return textFlow;
     }
 
     @Override

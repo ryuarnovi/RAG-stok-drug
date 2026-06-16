@@ -1,6 +1,6 @@
-# PharmaStock
+# KEPO
 
-Enterprise Pharmacy Stock Management System — Sistem Manajemen Stok Farmasi Berbasis AI.
+Kendali Evakuasi dan Pengelolaan Operasional Bencana — Sistem Manajemen Evakuasi & Penanggulangan Bencana Berbasis AI.
 
 ---
 
@@ -40,7 +40,7 @@ Enterprise Pharmacy Stock Management System — Sistem Manajemen Stok Farmasi Be
 | Dependency | Version | Purpose |
 |---|---|---|
 | Java | 21 | Language & runtime (LTS) |
-| MySQL Connector/J | 8.3.0 | JDBC driver |
+| PostgreSQL JDBC Driver | 42.7.2 | JDBC driver |
 | HikariCP | 5.1.0 | Connection pool |
 | ZXing | 3.5.3 | Barcode & QR code |
 | JasperReports | 6.21.3 | Report generation |
@@ -81,13 +81,13 @@ Enterprise Pharmacy Stock Management System — Sistem Manajemen Stok Farmasi Be
 - **Repository Pattern** — `BaseRepository<T>` generic interface
 - **Strategy Pattern** — `AIProvider` interface dengan 3 implementasi
 - **Singleton** — `DatabaseConfig` (HikariCP)
-- **Manual DI** — Wiring di `PharmaStockApp.main()`
+- **Manual DI** — Wiring di `KepoApp.main()`
 
 ---
 
 ## Database Schema
 
-**Engine:** MySQL 8+ | **Database:** `pharmastock`
+**Engine:** PostgreSQL 9.4+ | **Database:** `kepo`
 
 ### ER Diagram
 
@@ -136,8 +136,9 @@ pbo-project/
 │       ├── supplier.png
 │       └── laporan.png
 └── src/main/
-    ├── java/com/pharmastock/
-    │   ├── PharmaStockApp.java
+    ├── java/com/kepo/
+    │   ├── Main.java
+    │   ├── KepoApp.java
     │   ├── config/               # AppConfig, DatabaseConfig
     │   ├── controller/           # 5 Controllers
     │   ├── model/                # 6 Entities
@@ -160,17 +161,18 @@ pbo-project/
 Buat file `.env` di root project (lihat `.env.example`):
 
 ```env
-# Database
-DB_URL=jdbc:mysql://localhost:3306/pharmastock?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-DB_USERNAME=root
+# Database (PostgreSQL)
+DB_URL=jdbc:postgresql://localhost:5432/kepo
+DB_USERNAME=postgres
 DB_PASSWORD=
+DB_POOL_SIZE=10
 
 # AI Provider: LOCAL, OPENAI, GEMINI
 AI_PROVIDER=GEMINI
 
-# Gemini (recommended)
+# Gemini (optional)
 AI_GEMINI_API_KEY=your_api_key_here
-AI_GEMINI_MODEL=gemini-2.0-flash
+AI_GEMINI_MODEL=gemini-2.5-flash-lite
 
 # OpenAI (optional)
 AI_OPENAI_API_KEY=
@@ -186,19 +188,20 @@ AI_OPENAI_MODEL=gpt-3.5-turbo
 git clone <url>
 cd pbo-project
 
-# 2. Buat database MySQL
-mysql -u root -e "CREATE DATABASE pharmastock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# 2. Buat database PostgreSQL
+createdb -U postgres kepo
+# Atau masuk ke psql/pgAdmin: CREATE DATABASE kepo;
 
 # 3. Setup environment
 cp .env.example .env
 # Edit .env dengan konfigurasi Anda
 
 # 4. Build & run
-mvn clean compile exec:java -Dexec.mainClass="com.pharmastock.PharmaStockApp"
+mvn clean compile exec:java -Dexec.mainClass="com.kepo.Main"
 
 # Atau build fat JAR
 mvn clean package
-java -jar target/pharmastock-1.0.0.jar
+java -jar target/kepo-2.0.0.jar
 ```
 
 ---

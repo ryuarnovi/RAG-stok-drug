@@ -17,9 +17,11 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
 
     private final ShelterService shelterService;
     private final MainLayout mainLayout;
+    private com.kepo.service.ShelterStockService shelterStockService;
 
     private TextField searchField;
     private FlowPane cardsGrid;
+    private com.kepo.service.EventService eventService;
 
     // Right-hand Drawer
     private VBox drawer;
@@ -29,6 +31,7 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
     private TextField capacityField;
     private TextField occupancyField;
     private TextField pjField;
+    private ComboBox<com.kepo.model.Event> eventCombo;
     private Label errorLabel;
     private Button deleteBtn;
 
@@ -117,6 +120,11 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
         pjField.setPromptText("Nama penanggung jawab");
         pjField.setStyle(ThemeConstants.INPUT_STYLE);
 
+        eventCombo = new ComboBox<>();
+        eventCombo.setPromptText("Pilih Event Bencana Terkait");
+        eventCombo.setMaxWidth(Double.MAX_VALUE);
+        eventCombo.setStyle(ThemeConstants.INPUT_STYLE);
+
         errorLabel = new Label();
         errorLabel.setTextFill(Color.web(ThemeConstants.DANGER));
 
@@ -142,6 +150,7 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
                 createFormLabel("Kapasitas (Orang)"), capacityField,
                 createFormLabel("Terisi Sekarang"), occupancyField,
                 createFormLabel("Penanggung Jawab"), pjField,
+                createFormLabel("Event Bencana Terkait"), eventCombo,
                 errorLabel,
                 btnRow
         );
@@ -163,6 +172,7 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
     private void renderCards(String query) {
         cardsGrid.getChildren().clear();
         List<Shelter> list = shelterService.getAllShelters();
+        List<com.kepo.model.Event> allEvents = getEventService().getAllEvents();
 
         if (query != null && !query.isBlank()) {
             String q = query.toLowerCase();
@@ -198,15 +208,71 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
             pjLabel.setMaxWidth(218);
             pjLabel.setPrefWidth(218);
 
-            // Progress text bar (█████████░ 95%)
+            // Connected Event Name
+            String eventName = "Tidak Ada / Mandiri";
+            if (s.getEventId() != null && s.getEventId() > 0) {
+                eventName = allEvents.stream()
+                        .filter(e -> e.getEventId() == s.getEventId())
+                        .map(com.kepo.model.Event::getName)
+                        .findFirst()
+                        .orElse("Event Tidak Aktif");
+            }
+
+            Label eventLabel = new Label("Event: " + eventName);
+            eventLabel.setStyle("-fx-text-fill: " + ThemeConstants.PRIMARY_LIGHT + "; -fx-font-weight: bold; -fx-font-size: 11px;");
+            eventLabel.setWrapText(true);
+            eventLabel.setMaxWidth(218);
+            eventLabel.setPrefWidth(218);
+
+            // Lazy load shelterStockService
+            if (shelterStockService == null) {
+                com.kepo.config.DatabaseConfig db = com.kepo.config.DatabaseConfig.getInstance();
+                shelterStockService = new com.kepo.service.ShelterStockService(
+                    new com.kepo.repository.ShelterStockRepository(db),
+                    new com.kepo.repository.ShelterRepository(db)
+                );
+            }
+
+            // Calculate average logistics availability percentage
+            List<com.kepo.model.ShelterStock> stocks = shelterStockService.getShelterStocks(s.getShelterId());
+            double avgAvailability = 100.0;
+            if (!stocks.isEmpty()) {
+                double total = 0;
+                for (com.kepo.model.ShelterStock stock : stocks) {
+                    total += shelterStockService.calculateAvailabilityPercentage(stock);
+                }
+                avgAvailability = total / stocks.size();
+            }
+
+            // Occupancy / Density UI
+            Label occupancyTitle = new Label("Kepadatan Shelter:");
+            occupancyTitle.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px; -fx-font-weight: bold;");
+
             double ratio = s.getCapacity() > 0 ? (double) s.getCurrentOccupancy() / s.getCapacity() : 0.0;
             String textBar = getCapacityBar(s.getCurrentOccupancy(), s.getCapacity());
             Label barLabel = new Label(textBar);
             barLabel.setStyle("-fx-text-fill: " + ThemeConstants.PRIMARY + "; -fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-font-size: 12px;");
 
-            // Occupancy ratio text
             Label statsLabel = new Label(s.getCurrentOccupancy() + " / " + s.getCapacity() + " Jiwa");
-            statsLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE + "; -fx-font-weight: bold; -fx-font-size: 12px;");
+            statsLabel.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE + "; -fx-font-weight: bold; -fx-font-size: 11px;");
+
+            VBox densityBox = new VBox(2, occupancyTitle, barLabel, statsLabel);
+
+            // Logistics / Stock UI
+            Label logisticsTitle = new Label("Ketersediaan Logistik:");
+            logisticsTitle.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-size: 11px; -fx-font-weight: bold;");
+
+            String stockTextBar = getCapacityBar((int) Math.round(avgAvailability), 100);
+            Label stockBarLabel = new Label(stockTextBar);
+            if (avgAvailability < 50) {
+                stockBarLabel.setStyle("-fx-text-fill: " + ThemeConstants.DANGER + "; -fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-font-size: 12px;");
+            } else if (avgAvailability < 80) {
+                stockBarLabel.setStyle("-fx-text-fill: " + ThemeConstants.WARNING + "; -fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-font-size: 12px;");
+            } else {
+                stockBarLabel.setStyle("-fx-text-fill: " + ThemeConstants.SECONDARY + "; -fx-font-family: 'Courier New'; -fx-font-weight: bold; -fx-font-size: 12px;");
+            }
+
+            VBox logisticsBox = new VBox(2, logisticsTitle, stockBarLabel);
 
             // Severity Status Badge (SAFE, WARNING, CRITICAL)
             Label badge = new Label();
@@ -232,7 +298,7 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
             HBox footer = new HBox(detailsBtn);
             footer.setAlignment(Pos.CENTER_RIGHT);
 
-            card.getChildren().addAll(nameLabel, locLabel, pjLabel, barLabel, statsLabel, badgeRow, footer);
+            card.getChildren().addAll(nameLabel, locLabel, pjLabel, eventLabel, densityBox, logisticsBox, badgeRow, footer);
             cardsGrid.getChildren().add(card);
         }
     }
@@ -262,6 +328,16 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
         capacityField.clear();
         occupancyField.clear();
         pjField.clear();
+        
+        // Populate events dropdown
+        eventCombo.getItems().clear();
+        com.kepo.model.Event noneEvent = new com.kepo.model.Event();
+        noneEvent.setEventId(0);
+        noneEvent.setName("- Tidak Ada / Mandiri -");
+        eventCombo.getItems().add(noneEvent);
+        eventCombo.getItems().addAll(getEventService().getAllEvents());
+        eventCombo.setValue(noneEvent);
+
         errorLabel.setText("");
         deleteBtn.setVisible(false);
 
@@ -277,6 +353,26 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
         capacityField.setText(String.valueOf(s.getCapacity()));
         occupancyField.setText(String.valueOf(s.getCurrentOccupancy()));
         pjField.setText(s.getPenanggungJawab());
+        
+        // Populate events dropdown
+        eventCombo.getItems().clear();
+        com.kepo.model.Event noneEvent = new com.kepo.model.Event();
+        noneEvent.setEventId(0);
+        noneEvent.setName("- Tidak Ada / Mandiri -");
+        eventCombo.getItems().add(noneEvent);
+        List<com.kepo.model.Event> allEvents = getEventService().getAllEvents();
+        eventCombo.getItems().addAll(allEvents);
+
+        if (s.getEventId() == null || s.getEventId() == 0) {
+            eventCombo.setValue(noneEvent);
+        } else {
+            com.kepo.model.Event selectedEv = allEvents.stream()
+                    .filter(ev -> ev.getEventId() == s.getEventId())
+                    .findFirst()
+                    .orElse(noneEvent);
+            eventCombo.setValue(selectedEv);
+        }
+
         errorLabel.setText("");
         deleteBtn.setVisible(true);
 
@@ -312,6 +408,9 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
             return;
         }
 
+        com.kepo.model.Event selectedEv = eventCombo.getValue();
+        Integer eventId = (selectedEv == null || selectedEv.getEventId() == 0) ? null : selectedEv.getEventId();
+
         Shelter s = selectedShelter;
         if (s == null) {
             s = new Shelter();
@@ -321,6 +420,7 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
         s.setCapacity(capacity);
         s.setCurrentOccupancy(occupancy);
         s.setPenanggungJawab(pj);
+        s.setEventId(eventId);
 
         if (shelterService.saveShelter(s)) {
             closeDrawer();
@@ -343,6 +443,17 @@ public class ShelterPanel extends VBox implements RefreshablePanel {
                 }
             }
         });
+    }
+
+    private com.kepo.service.EventService getEventService() {
+        if (eventService == null) {
+            com.kepo.config.DatabaseConfig db = com.kepo.config.DatabaseConfig.getInstance();
+            com.kepo.repository.UserRepository userRepo = new com.kepo.repository.UserRepository(db);
+            com.kepo.repository.AuditLogRepository auditRepo = new com.kepo.repository.AuditLogRepository(db);
+            com.kepo.service.UserService userService = new com.kepo.service.UserService(userRepo, auditRepo);
+            eventService = new com.kepo.service.EventService(new com.kepo.repository.EventRepository(db), userService);
+        }
+        return eventService;
     }
 
     @Override

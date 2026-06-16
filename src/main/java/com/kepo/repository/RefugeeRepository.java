@@ -17,7 +17,7 @@ public class RefugeeRepository {
 
     public List<Refugee> findAll() {
         List<Refugee> list = new ArrayList<>();
-        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
+        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.priority_status, r.family_code, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
                      "FROM refugees r LEFT JOIN shelters s ON r.shelter_id = s.shelter_id ORDER BY r.created_at DESC";
         try (Connection conn = dbConfig.getConnection();
              Statement stmt = conn.createStatement();
@@ -32,7 +32,7 @@ public class RefugeeRepository {
     }
 
     public Refugee findById(int refugeeId) {
-        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
+        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.priority_status, r.family_code, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
                      "FROM refugees r LEFT JOIN shelters s ON r.shelter_id = s.shelter_id WHERE r.refugee_id = ?";
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -49,7 +49,7 @@ public class RefugeeRepository {
     }
 
     public Refugee findByNik(String nik) {
-        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
+        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.priority_status, r.family_code, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
                      "FROM refugees r LEFT JOIN shelters s ON r.shelter_id = s.shelter_id WHERE r.nik = ?";
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -67,7 +67,7 @@ public class RefugeeRepository {
 
     public List<Refugee> findByShelter(int shelterId) {
         List<Refugee> list = new ArrayList<>();
-        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
+        String sql = "SELECT r.refugee_id, r.name, r.nik, r.age, r.gender, r.status, r.medical_notes, r.priority_status, r.family_code, r.shelter_id, r.check_in_time, r.check_out_time, r.created_at, s.name AS shelter_name " +
                      "FROM refugees r LEFT JOIN shelters s ON r.shelter_id = s.shelter_id WHERE r.shelter_id = ? ORDER BY r.name ASC";
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -85,7 +85,7 @@ public class RefugeeRepository {
 
     public boolean save(Refugee refugee) {
         if (refugee.getRefugeeId() > 0) {
-            String sql = "UPDATE refugees SET name = ?, nik = ?, age = ?, gender = ?, status = ?, medical_notes = ?, shelter_id = ?, check_in_time = ?, check_out_time = ? WHERE refugee_id = ?";
+            String sql = "UPDATE refugees SET name = ?, nik = ?, age = ?, gender = ?, status = ?, medical_notes = ?, priority_status = ?, family_code = ?, shelter_id = ?, check_in_time = ?, check_out_time = ? WHERE refugee_id = ?";
             try (Connection conn = dbConfig.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, refugee.getName());
@@ -94,20 +94,22 @@ public class RefugeeRepository {
                 ps.setString(4, refugee.getGender());
                 ps.setString(5, refugee.getStatus());
                 ps.setString(6, refugee.getMedicalNotes());
+                ps.setString(7, refugee.getPriorityStatus());
+                ps.setString(8, refugee.getFamilyCode());
                 if (refugee.getShelterId() != null) {
-                    ps.setInt(7, refugee.getShelterId());
+                    ps.setInt(9, refugee.getShelterId());
                 } else {
-                    ps.setNull(7, Types.INTEGER);
+                    ps.setNull(9, Types.INTEGER);
                 }
-                ps.setTimestamp(8, refugee.getCheckInTime());
-                ps.setTimestamp(9, refugee.getCheckOutTime());
-                ps.setInt(10, refugee.getRefugeeId());
+                ps.setTimestamp(10, refugee.getCheckInTime());
+                ps.setTimestamp(11, refugee.getCheckOutTime());
+                ps.setInt(12, refugee.getRefugeeId());
                 return ps.executeUpdate() > 0;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         } else {
-            String sql = "INSERT INTO refugees (name, nik, age, gender, status, medical_notes, shelter_id, check_in_time, check_out_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO refugees (name, nik, age, gender, status, medical_notes, priority_status, family_code, shelter_id, check_in_time, check_out_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             try (Connection conn = dbConfig.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, refugee.getName());
@@ -116,13 +118,15 @@ public class RefugeeRepository {
                 ps.setString(4, refugee.getGender());
                 ps.setString(5, refugee.getStatus());
                 ps.setString(6, refugee.getMedicalNotes());
+                ps.setString(7, refugee.getPriorityStatus());
+                ps.setString(8, refugee.getFamilyCode());
                 if (refugee.getShelterId() != null) {
-                    ps.setInt(7, refugee.getShelterId());
+                    ps.setInt(9, refugee.getShelterId());
                 } else {
-                    ps.setNull(7, Types.INTEGER);
+                    ps.setNull(9, Types.INTEGER);
                 }
-                ps.setTimestamp(8, refugee.getCheckInTime());
-                ps.setTimestamp(9, refugee.getCheckOutTime());
+                ps.setTimestamp(10, refugee.getCheckInTime());
+                ps.setTimestamp(11, refugee.getCheckOutTime());
                 if (ps.executeUpdate() > 0) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
@@ -159,6 +163,8 @@ public class RefugeeRepository {
         r.setGender(rs.getString("gender"));
         r.setStatus(rs.getString("status"));
         r.setMedicalNotes(rs.getString("medical_notes"));
+        r.setPriorityStatus(rs.getString("priority_status"));
+        r.setFamilyCode(rs.getString("family_code"));
         int shelterId = rs.getInt("shelter_id");
         if (rs.wasNull()) {
             r.setShelterId(null);

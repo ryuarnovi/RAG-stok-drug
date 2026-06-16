@@ -5,6 +5,7 @@ import com.kepo.config.DatabaseConfig;
 import com.kepo.controller.DashboardController;
 import com.kepo.controller.InventoryController;
 import com.kepo.controller.LoginController;
+import com.kepo.controller.RefugeeShelterController;
 import com.kepo.repository.*;
 import com.kepo.service.*;
 import com.kepo.service.ai.AIProvider;
@@ -41,6 +42,7 @@ public class KepoApp extends Application {
     private LoginController loginController;
     private DashboardController dashboardController;
     private InventoryController inventoryController;
+    private RefugeeShelterController refugeeShelterController;
 
     @Override
     public void start(Stage primaryStage) {
@@ -102,7 +104,16 @@ public class KepoApp extends Application {
 
             // 6. Initialize controllers
             loginController = new LoginController(userService);
-            dashboardController = new DashboardController(shelterService, refugeeService, inventoryService, distributionService, eventService, aiRecommendationService, userService);
+            
+            RefugeeMovementRepository movementRepo = new RefugeeMovementRepository(dbConfig);
+            ShelterStockRepository shelterStockRepo = new ShelterStockRepository(dbConfig);
+            
+            RefugeeShelterService refugeeShelterService = new RefugeeShelterService(refugeeRepo, movementRepo, shelterRepo);
+            ShelterStockService shelterStockService = new ShelterStockService(shelterStockRepo, shelterRepo);
+            
+            refugeeShelterController = new RefugeeShelterController(refugeeShelterService, shelterStockService, userService);
+            
+            dashboardController = new DashboardController(shelterService, refugeeService, inventoryService, distributionService, eventService, aiRecommendationService, userService, shelterStockService);
             inventoryController = new InventoryController(inventoryService, barcodeService);
 
             // 7. Show Login view
@@ -129,6 +140,7 @@ public class KepoApp extends Application {
         MainLayout mainLayout = new MainLayout(
                 dashboardController,
                 inventoryController,
+                refugeeShelterController,
                 userService,
                 eventService,
                 shelterService,

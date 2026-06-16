@@ -1,8 +1,11 @@
 -- KEPO Database Schema (PostgreSQL)
 
 DROP TABLE IF EXISTS audit_logs CASCADE;
+DROP TABLE IF EXISTS refugee_movements CASCADE;
 DROP TABLE IF EXISTS inventory_transactions CASCADE;
+DROP TABLE IF EXISTS distribution_details CASCADE;
 DROP TABLE IF EXISTS distributions CASCADE;
+DROP TABLE IF EXISTS shelter_stocks CASCADE;
 DROP TABLE IF EXISTS medicines CASCADE;
 DROP TABLE IF EXISTS refugees CASCADE;
 DROP TABLE IF EXISTS shelters CASCADE;
@@ -28,6 +31,7 @@ CREATE TABLE events (
     location VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', -- ACTIVE, CLOSED
     description TEXT,
+    shelter_count INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -40,6 +44,7 @@ CREATE TABLE shelters (
     current_occupancy INT NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'AMAN', -- AMAN, WASPADA, KRITIS
     penanggung_jawab VARCHAR(100) NOT NULL DEFAULT '',
+    event_id INT REFERENCES events(event_id) ON DELETE SET NULL ON UPDATE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -52,10 +57,23 @@ CREATE TABLE refugees (
     gender VARCHAR(20) NOT NULL, -- Laki-laki, Perempuan
     status VARCHAR(20) NOT NULL DEFAULT 'CHECKED_IN', -- CHECKED_IN, CHECKED_OUT
     medical_notes TEXT,
+    priority_status VARCHAR(50) DEFAULT 'REGULAR', -- REGULAR, BALITA, LANSIA, IBU_HAMIL, DISABILITAS, SICK
+    family_code VARCHAR(50),
     shelter_id INT REFERENCES shelters(shelter_id) ON DELETE SET NULL ON UPDATE CASCADE,
     check_in_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     check_out_time TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Refugee Movements table
+CREATE TABLE refugee_movements (
+    movement_id SERIAL PRIMARY KEY,
+    refugee_id INT NOT NULL REFERENCES refugees(refugee_id) ON DELETE CASCADE,
+    from_shelter_id INT REFERENCES shelters(shelter_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    to_shelter_id INT REFERENCES shelters(shelter_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    moved_by VARCHAR(50) REFERENCES users(username) ON DELETE SET NULL ON UPDATE CASCADE,
+    notes TEXT,
+    moved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Suppliers table
@@ -107,6 +125,25 @@ CREATE TABLE distributions (
     status VARCHAR(20) NOT NULL DEFAULT 'DRAFT', -- DRAFT, APPROVED, SHIPPED, RECEIVED
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Distribution Details table (detailed medicine/item distribution)
+CREATE TABLE distribution_details (
+    detail_id SERIAL PRIMARY KEY,
+    distribution_id INT NOT NULL REFERENCES distributions(distribution_id) ON DELETE CASCADE,
+    medicine_id INT NOT NULL REFERENCES medicines(medicine_id) ON DELETE CASCADE,
+    quantity INT NOT NULL CHECK (quantity > 0)
+);
+
+-- Shelter Stocks table (inventaris per posko)
+CREATE TABLE shelter_stocks (
+    shelter_stock_id SERIAL PRIMARY KEY,
+    shelter_id INT NOT NULL REFERENCES shelters(shelter_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    medicine_id INT NOT NULL REFERENCES medicines(medicine_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    quantity INT NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+    minimum_stock INT NOT NULL DEFAULT 10 CHECK (minimum_stock >= 0),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(shelter_id, medicine_id)
 );
 
 -- Inventory Transactions table (mainly for medicine stock logs)

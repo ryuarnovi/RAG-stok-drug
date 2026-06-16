@@ -1,556 +1,439 @@
-# PRODUCT REQUIREMENT DOCUMENT (PRD)
+# PRODUCT REQUIREMENTS DOCUMENT (PRD)
 
 # KEPO
 
 ## Kendali Evakuasi dan Pengelolaan Operasional Bencana
 
-Versi: 2.0
-
-Status: Draft Final
-
+Version: 2.0
+Status: Final Draft
 Platform: Desktop Application
-
-Teknologi UI: JavaFX + MaterialFX
-
-Bahasa Pemrograman: Java 21
+Technology: Java 21 + JavaFX + PostgreSQL
 
 ---
 
-# 1. Ringkasan Eksekutif
+# 1. Product Overview
 
-KEPO (Kendali Evakuasi dan Pengelolaan Operasional Bencana) adalah sistem informasi desktop terintegrasi yang dirancang untuk mendukung operasi penanggulangan bencana kebakaran secara menyeluruh.
+KEPO (Kendali Evakuasi dan Pengelolaan Operasional Bencana) adalah sistem informasi terpadu yang digunakan untuk mengelola operasi evakuasi, pengungsi, shelter, logistik, obat-obatan, dan pelaporan selama situasi bencana.
 
-Sistem menyediakan kemampuan untuk:
+Sistem berfungsi sebagai Command Center yang membantu petugas lapangan dan pengambil keputusan memperoleh informasi kondisi pengungsi, kapasitas shelter, serta kebutuhan logistik secara cepat dan akurat.
 
-* Mengelola data shelter
-* Mengelola data pengungsi
-* Mengelola inventaris obat
-* Mengelola distribusi bantuan
-* Memantau kapasitas shelter
-* Menghasilkan laporan operasional
-* Memberikan rekomendasi berbasis Artificial Intelligence
-
-KEPO dirancang sebagai pusat kendali operasional (Command Center) yang memungkinkan petugas memonitor kondisi lapangan secara real-time dari satu platform.
+Target utama sistem adalah meningkatkan efektivitas respon bencana, mempercepat distribusi bantuan, dan meminimalkan kekurangan logistik pada shelter.
 
 ---
 
-# 2. Latar Belakang
+# 2. Problem Statement
 
-Dalam operasi penanggulangan bencana kebakaran terdapat beberapa tantangan utama:
+Dalam penanganan bencana sering ditemukan permasalahan:
 
-* Data pengungsi tersebar dan tidak terpusat
-* Shelter mengalami over-capacity
-* Distribusi bantuan tidak merata
-* Inventaris obat tidak termonitor secara optimal
-* Pelaporan membutuhkan waktu lama
-* Tidak tersedia sistem pendukung keputusan yang membantu petugas lapangan
+* Data pengungsi tersebar di berbagai lokasi.
+* Shelter mengalami kelebihan kapasitas.
+* Distribusi bantuan tidak merata.
+* Ketersediaan obat sulit dipantau.
+* Sulit mengetahui shelter mana yang membutuhkan bantuan prioritas.
+* Proses pelaporan masih dilakukan secara manual.
+* Tidak tersedia sistem rekomendasi berbasis data.
 
-KEPO dibangun untuk mengintegrasikan seluruh proses tersebut dalam satu sistem terpadu.
-
----
-
-# 3. Tujuan Sistem
-
-## Tujuan Utama
-
-Menyediakan platform terpadu untuk pengelolaan evakuasi, logistik kesehatan, dan distribusi bantuan selama operasi penanggulangan bencana.
-
-## Tujuan Khusus
-
-* Monitoring shelter secara real-time
-* Monitoring pengungsi secara real-time
-* Pengelolaan inventaris obat
-* Distribusi bantuan yang tepat sasaran
-* Pembuatan laporan otomatis
-* Rekomendasi operasional berbasis AI
+Akibatnya proses pengambilan keputusan menjadi lambat dan berpotensi menimbulkan ketidaktepatan distribusi bantuan.
 
 ---
 
-# 4. Pengguna Sistem
+# 3. Product Goals
 
-## 4.1 Administrator
+## Primary Goals
 
-Hak akses penuh terhadap seluruh sistem.
+* Memusatkan seluruh data operasional bencana dalam satu sistem.
+* Memantau kondisi shelter secara real-time.
+* Memantau persebaran pengungsi.
+* Mengelola distribusi bantuan dan obat.
+* Menyediakan laporan operasional otomatis.
+* Memberikan rekomendasi prioritas berbasis AI.
 
-Tanggung Jawab:
+## Success Metrics
 
-* Mengelola pengguna
-* Mengelola event bencana
-* Melihat seluruh laporan
-* Menyetujui distribusi bantuan
-
----
-
-## 4.2 Petugas Kesehatan
-
-Tanggung Jawab:
-
-* Mengelola inventaris obat
-* Melakukan distribusi obat
-* Memantau stok
-* Mengakses AI Recommendation
+* Waktu pencarian data pengungsi < 5 detik.
+* Akurasi data shelter > 95%.
+* Pengurangan shelter over-capacity minimal 50%.
+* Pengurangan kejadian kekurangan logistik minimal 40%.
+* Waktu pembuatan laporan < 30 detik.
 
 ---
 
-## 4.3 Petugas Shelter
+# 4. User Roles
 
-Tanggung Jawab:
+## Administrator
+
+Hak akses penuh terhadap sistem.
+
+Fitur:
+
+* Manajemen pengguna
+* Manajemen role
+* Manajemen event bencana
+* Monitoring seluruh data
+* Approval distribusi bantuan
+
+---
+
+## Petugas Shelter
+
+Fitur:
 
 * Registrasi pengungsi
-* Check-in pengungsi
-* Check-out pengungsi
+* Penempatan pengungsi ke shelter
+* Check-in / Check-out
 * Monitoring kapasitas shelter
+* Pelaporan kondisi shelter
 
 ---
 
-# 5. Teknologi
-
-## Bahasa Pemrograman
-
-Java 21
-
----
-
-## Desktop Framework
-
-JavaFX
-
-MaterialFX
-
-Alasan:
-
-* Modern User Interface
-* CSS Styling
-* Responsive Layout
-* Dark Mode Support
-* Animasi dan Transisi
-* Lebih fleksibel dibanding Java Swing
-
----
-
-## Database
-
-PostgreSQL 16
-
----
-
-## Koneksi Database
-
-JDBC
-
-HikariCP Connection Pool
-
----
-
-## Build Tool
-
-Maven
-
----
-
-## Reporting
-
-JasperReports
-
----
-
-## Barcode
-
-ZXing
-
----
-
-## Visualisasi Data
-
-ChartsFX
-
----
-
-## JSON Processing
-
-Jackson
-
----
-
-## AI Integration
-
-Java HttpClient
-
-OpenAI API
-
-Gemini API
-
-Rule-Based Recommendation Engine
-
----
-
-# 6. Arsitektur Sistem
-
-## Arsitektur
-
-Clean MVC Architecture
-
-Presentation Layer
-
-↓
-
-Controller Layer
-
-↓
-
-Service Layer
-
-↓
-
-Repository Layer
-
-↓
-
-Database Layer
-
----
-
-# 7. Struktur Modul
-
-## Dashboard
-
-Command Center utama.
-
----
-
-## Event Bencana
-
-Manajemen operasi bencana.
-
----
-
-## Shelter
-
-Manajemen lokasi evakuasi.
-
----
-
-## Pengungsi
-
-Pendataan dan monitoring pengungsi.
-
----
-
-## Inventaris Obat
-
-Manajemen stok dan distribusi obat.
-
----
-
-## Distribusi Bantuan
-
-Pengelolaan alokasi bantuan.
-
----
-
-## Supplier dan Donatur
-
-Pengelolaan sumber bantuan.
-
----
-
-## AI Assistant
-
-Analisis dan rekomendasi.
-
----
-
-## Laporan
-
-Pelaporan operasional.
-
----
-
-## Pengaturan
-
-Manajemen pengguna dan konfigurasi sistem.
-
----
-
-# 8. Desain UI/UX
-
-## Konsep Desain
-
-Emergency Command Center
-
-Tampilan modern dengan pendekatan dashboard operasional.
-
-Inspirasi:
-
-* Linear
-* Notion
-* Jira
-* Supabase Dashboard
-
----
-
-## Struktur Layout
-
-Top Navigation Bar
-
-Sidebar Navigation
-
-Main Content Area
-
-Right Notification Panel
-
----
-
-## Sidebar Menu
-
-Dashboard
-
-Event Bencana
-
-Shelter
-
-Pengungsi
-
-Inventaris Obat
-
-Distribusi Bantuan
-
-Supplier dan Donatur
-
-AI Assistant
-
-Laporan
-
-Pengaturan
-
----
-
-## Dashboard Utama
-
-### KPI Cards
-
-Menampilkan:
-
-* Shelter Aktif
-* Total Pengungsi
-* Shelter Penuh
-* Obat Kritis
-* Distribusi Hari Ini
-* Kasus Medis
-
----
-
-### Emergency Alert Center
-
-Menampilkan:
-
-* Shelter Over Capacity
-* Obat Hampir Habis
-* Distribusi Tertunda
-* Kasus Medis Prioritas
-
----
-
-### Shelter Monitoring
-
-Progress Bar kapasitas shelter.
-
-Warna:
-
-Hijau = Aman
-
-Kuning = Waspada
-
-Merah = Kritis
-
----
-
-### AI Recommendation Panel
-
-Contoh:
-
-* Shelter A membutuhkan tambahan obat
-* Shelter B mendekati kapasitas maksimum
-* Prediksi kebutuhan stok 7 hari ke depan
-
----
-
-# 9. Modul Event Bencana
+## Petugas Kesehatan
 
 Fitur:
 
-* Membuat event baru
-* Mengubah status event
+* Manajemen inventaris obat
+* Distribusi obat ke shelter
+* Monitoring stok
+* Monitoring kedaluwarsa
+* AI Recommendation
+
+---
+
+## Koordinator Lapangan
+
+Fitur:
+
+* Monitoring seluruh shelter
+* Monitoring distribusi bantuan
+* Dashboard operasional
+* Pelaporan harian
+
+---
+
+# 5. Core Business Flow
+
+Event Bencana Dibuat
+
+↓
+
+Shelter Dibuka
+
+↓
+
+Pengungsi Diregistrasi
+
+↓
+
+Pengungsi Ditempatkan ke Shelter
+
+↓
+
+Kebutuhan Shelter Dihitung
+
+↓
+
+Distribusi Logistik dan Obat
+
+↓
+
+Monitoring Shelter
+
+↓
+
+Laporan Operasional
+
+↓
+
+Penutupan Event
+
+---
+
+# 6. Functional Requirements
+
+## FR-01 Event Management
+
+Sistem harus mampu:
+
+* Membuat event bencana
+* Menentukan lokasi kejadian
+* Menentukan status event
 * Menutup event
-* Statistik event
-
----
-
-# 10. Modul Shelter
-
-Fitur:
-
-* CRUD Shelter
-* Monitoring Kapasitas
-* Riwayat Shelter
-* Status Shelter
-
-Data:
-
-* Nama Shelter
-* Lokasi
-* Kapasitas
-* Penanggung Jawab
-* Status
-
----
-
-# 11. Modul Pengungsi
-
-Fitur:
-
-* Registrasi Pengungsi
-* Check In
-* Check Out
-* Riwayat Pengungsi
-* Catatan Medis
-
----
-
-# 12. Modul Inventaris Obat
-
-Fitur:
-
-* CRUD Obat
-* Monitoring Stok
-* Monitoring Kedaluwarsa
-* Barcode Management
-* Riwayat Transaksi
-
----
-
-# 13. Modul Distribusi Bantuan
-
-Fitur:
-
-* Pembuatan Dokumen Distribusi
-* Approval Workflow
-* Tracking Distribusi
-* Riwayat Distribusi
 
 Status:
 
-Draft
-
-Disetujui
-
-Dikirim
-
-Diterima
+* Active
+* Monitoring
+* Closed
 
 ---
 
-# 14. Modul AI Assistant
+## FR-02 Shelter Management
 
-## AI Recommendation
+Sistem harus mampu:
 
-Memberikan rekomendasi:
+* CRUD shelter
+* Menentukan kapasitas shelter
+* Menampilkan jumlah penghuni
+* Menampilkan kapasitas tersisa
+* Menampilkan status shelter
+
+Status Shelter:
+
+* Available
+* Warning
+* Full
+* Closed
+
+Rumus Kapasitas:
+
+Occupancy Rate = Penghuni / Kapasitas × 100%
+
+---
+
+## FR-03 Refugee Management
+
+Sistem harus mampu:
+
+* Registrasi pengungsi
+* Pendataan keluarga
+* Penempatan shelter
+* Riwayat perpindahan shelter
+* Check-in
+* Check-out
+
+Data Pengungsi:
+
+* NIK
+* Nama
+* Jenis Kelamin
+* Tanggal Lahir
+* Nomor KK
+* Status Kesehatan
+* Kategori Rentan
+
+Kategori Rentan:
+
+* Anak-anak
+* Lansia
+* Ibu Hamil
+* Disabilitas
+* Penyakit Kronis
+
+---
+
+## FR-04 Shelter Placement Management
+
+Sistem harus mampu:
+
+* Menempatkan pengungsi ke shelter.
+* Menampilkan daftar penghuni shelter.
+* Menampilkan riwayat perpindahan.
+* Menolak penempatan jika kapasitas penuh.
+
+Dashboard Shelter menampilkan:
+
+* Total penghuni
+* Kapasitas
+* Persentase okupansi
+* Kategori pengungsi
+
+---
+
+## FR-05 Medical Inventory Management
+
+Sistem harus mampu:
+
+* CRUD obat
+* Monitoring stok
+* Monitoring batch
+* Monitoring kedaluwarsa
+* Barcode dan QR Code
+
+Status Stok:
+
+* Aman
+* Rendah
+* Kritis
+* Habis
+
+---
+
+## FR-06 Logistics Distribution
+
+Sistem harus mampu:
+
+* Distribusi logistik ke shelter
+* Distribusi obat ke shelter
+* Monitoring stok shelter
+* Tracking distribusi
+
+Status Distribusi:
+
+* Draft
+* Approved
+* Sent
+* Received
+
+---
+
+## FR-07 Shelter Logistics Monitoring
+
+Setiap shelter memiliki stok logistik sendiri.
+
+Sistem harus menampilkan:
+
+* Stok saat ini
+* Kebutuhan minimum
+* Persentase ketersediaan
+* Estimasi hari cakupan
+
+Rumus:
+
+Availability (%) =
+(Stok Saat Ini / Kebutuhan Shelter) × 100%
+
+Status:
+
+* ≥100% = Aman
+* 70–99% = Waspada
+* <70% = Kritis
+
+---
+
+## FR-08 Dashboard Command Center
+
+Dashboard menampilkan:
+
+### KPI
+
+* Event Aktif
+* Shelter Aktif
+* Total Pengungsi
+* Shelter Penuh
+* Shelter Kritis
+* Distribusi Hari Ini
+
+### Monitoring
+
+* Shelter Occupancy
+* Distribusi Logistik
+* Distribusi Obat
+* Pengungsi Rentan
+* Alert Operasional
+
+### AI Insights
 
 * Prioritas distribusi
-* Shelter prioritas
-* Prediksi stok
-* Analisis kebutuhan
+* Shelter yang membutuhkan bantuan
+* Prediksi kebutuhan logistik 7 hari
+* Prediksi kebutuhan obat
 
 ---
 
-## AI Chat
+## FR-09 AI Assistant
 
-Petugas dapat bertanya:
+AI dapat menjawab:
 
-"Obat apa yang hampir habis?"
+* Shelter mana yang penuh?
+* Shelter mana yang kekurangan obat?
+* Berapa jumlah pengungsi lansia?
+* Distribusi apa yang harus diprioritaskan?
 
-"Shelter mana yang penuh?"
-
-"Bantuan apa yang harus diprioritaskan?"
+AI juga menghasilkan rekomendasi otomatis.
 
 ---
 
-# 15. Laporan
-
-Jenis laporan:
-
-* Laporan Shelter
-* Laporan Pengungsi
-* Laporan Inventaris
-* Laporan Distribusi
-* Laporan Donatur
-* Laporan Event Bencana
+## FR-10 Reporting
 
 Format:
 
 * PDF
 * Excel
 
+Jenis Laporan:
+
+* Shelter
+* Pengungsi
+* Distribusi
+* Logistik
+* Inventaris Obat
+* Event Bencana
+
 ---
 
-# 16. Keamanan
+# 7. Non Functional Requirements
 
-Autentikasi:
+## Performance
+
+* Dashboard ≤ 3 detik
+* Pencarian ≤ 2 detik
+* Laporan ≤ 30 detik
+
+## Security
 
 * BCrypt Password Hash
-
-Otorisasi:
-
-* Role Based Access Control
-
-Audit:
-
+* RBAC
 * Audit Log
-
-Keamanan Database:
-
 * Prepared Statement
 * Input Validation
 
----
+## Reliability
 
-# 17. Deployment
+* Backup Harian
+* Recovery Database
+* Transaction Logging
 
-Output:
+## Scalability
 
-* Windows (.exe)
-* Windows (.msi)
-* Linux (.AppImage)
-* Linux (.deb)
-* macOS (.dmg)
+Minimal mendukung:
 
-Menggunakan:
-
-jpackage
-
----
-
-# 18. Target Kinerja
-
-Dashboard Load Time < 3 detik
-
-Pembuatan Laporan < 30 detik
-
-Mendukung:
-
-* 100 Shelter
+* 100 Event Aktif
+* 500 Shelter
 * 50.000 Pengungsi
-* 100.000 Transaksi
+* 500.000 Transaksi
 
 ---
 
-# 19. Future Development
+# 8. MVP Scope (Versi 2.0)
 
-* Mobile Companion App
-* GIS Map Integration
+Termasuk:
+
+* Authentication
+* Event Management
+* Shelter Management
+* Refugee Management
+* Medical Inventory
+* Distribution Management
+* Dashboard
+* Reporting
+* AI Recommendation
+
+Tidak termasuk:
+
+* GIS Map
+* Mobile App
 * SMS Gateway
-* WhatsApp Notification
+* WhatsApp Gateway
+* IoT Monitoring
+* OCR Document
+
+---
+
+# 9. Future Roadmap
+
+Phase 3
+
+* GIS Shelter Mapping
+* Mobile Companion App
 * Offline Synchronization
-* IoT Shelter Monitoring
-* OCR Dokumen Korban
+
+Phase 4
+
+* WhatsApp Notification
+* SMS Gateway
+* OCR Document Scanner
+
+Phase 5
+
 * Machine Learning Forecasting
+* Disaster Prediction Analytics
+* Resource Optimization Engine

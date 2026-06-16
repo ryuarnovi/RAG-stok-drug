@@ -4,6 +4,7 @@ import com.kepo.model.Distribution;
 import com.kepo.model.Shelter;
 import com.kepo.model.Medicine;
 import com.kepo.controller.InventoryController;
+import com.kepo.controller.RefugeeShelterController;
 import com.kepo.service.DistributionService;
 import com.kepo.service.ShelterService;
 import javafx.collections.FXCollections;
@@ -26,6 +27,7 @@ public class DistributionPanel extends VBox implements RefreshablePanel {
     private final DistributionService distributionService;
     private final ShelterService shelterService;
     private final InventoryController inventoryController;
+    private final RefugeeShelterController refugeeShelterController;
     private final MainLayout mainLayout;
 
     private FlowPane cardsGrid;
@@ -53,12 +55,17 @@ public class DistributionPanel extends VBox implements RefreshablePanel {
     private VBox drawer;
     private Label drawerTitle;
 
+    // Shelter stocks displays
+    private VBox shelterStocksSection;
+    private VBox shelterStocksContainer;
+
     private Distribution selectedDistribution;
 
-    public DistributionPanel(DistributionService distributionService, ShelterService shelterService, InventoryController inventoryController, MainLayout mainLayout) {
+    public DistributionPanel(DistributionService distributionService, ShelterService shelterService, InventoryController inventoryController, RefugeeShelterController refugeeShelterController, MainLayout mainLayout) {
         this.distributionService = distributionService;
         this.shelterService = shelterService;
         this.inventoryController = inventoryController;
+        this.refugeeShelterController = refugeeShelterController;
         this.mainLayout = mainLayout;
 
         initUI();
@@ -134,6 +141,9 @@ public class DistributionPanel extends VBox implements RefreshablePanel {
         shelterCombo = new ComboBox<>();
         shelterCombo.setMaxWidth(Double.MAX_VALUE);
         shelterCombo.setStyle(ThemeConstants.INPUT_STYLE);
+        shelterCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            updateShelterStocksDisplay(newVal);
+        });
 
         itemCombo = new ComboBox<>();
         itemCombo.setMaxWidth(Double.MAX_VALUE);
@@ -228,10 +238,22 @@ public class DistributionPanel extends VBox implements RefreshablePanel {
 
         workflowBox.getChildren().addAll(workflowLabel, approveBtn, shipBtn, receiveBtn);
 
+        // Shelter Stocks Display Panel
+        shelterStocksSection = new VBox(6);
+        Label sStockTitle = new Label("Stok & Kesiapan Logistik Posko:");
+        sStockTitle.setFont(Font.font("Plus Jakarta Sans", FontWeight.BOLD, 12));
+        sStockTitle.setTextFill(Color.web(ThemeConstants.PRIMARY));
+        shelterStocksContainer = new VBox(4);
+        shelterStocksSection.getChildren().addAll(sStockTitle, shelterStocksContainer);
+        shelterStocksSection.setVisible(false);
+        shelterStocksSection.setManaged(false);
+
         scrollContent.getChildren().addAll(
                 drawerTitle,
                 createFormLabel("No Dokumen"), docNumField,
                 createFormLabel("Shelter Tujuan"), shelterCombo,
+                shelterStocksSection,
+                new Separator(),
                 createFormLabel("Pilih Obat"), itemCombo,
                 createFormLabel("Jumlah Qty"), qtyField,
                 addMedBtn,
@@ -691,10 +713,62 @@ public class DistributionPanel extends VBox implements RefreshablePanel {
     private void handleReceive() {
         if (selectedDistribution == null) return;
         if (distributionService.receiveDistribution(selectedDistribution.getDistributionId())) {
+            // Add items to shelter stocks
+            for (MedicineAllocation alloc : currentAllocations) {
+                Medicine activeMed = inventoryController.getMedicineByCode(alloc.getMedicineCode());
+                if (activeMed != null) {
+                    refugeeShelterController.updateShelterStock(
+                        selectedDistribution.getShelterId(),
+                        activeMed.getMedicineId(),
+                        alloc.getQuantity()
+                    );
+                }
+            }
             closeDrawer();
             refreshData();
         } else {
             errorLabel.setText("Gagal memproses penerimaan bantuan.");
+        }
+    }
+
+    private void updateShelterStocksDisplay(Shelter shelter) {
+        shelterStocksContainer.getChildren().clear();
+        if (shelter == null) {
+            shelterStocksSection.setVisible(false);
+            shelterStocksSection.setManaged(false);
+            return;
+        }
+
+        shelterStocksSection.setVisible(true);
+        shelterStocksSection.setManaged(true);
+
+        List<com.kepo.model.ShelterStock> stocks = refugeeShelterController.getShelterStocks(shelter.getShelterId());
+        if (stocks.isEmpty()) {
+            Label emptyLbl = new Label("Belum ada stok obat di posko ini.");
+            emptyLbl.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE_VARIANT + "; -fx-font-style: italic; -fx-font-size: 11px;");
+            shelterStocksContainer.getChildren().add(emptyLbl);
+        } else {
+            for (com.kepo.model.ShelterStock s : stocks) {
+                double pct = refugeeShelterController.calculateAvailabilityPercentage(s);
+                double doc = refugeeShelterController.estimateDaysOfCoverage(s, shelter.getCurrentOccupancy());
+                
+                String docStr = Double.isInfinite(doc) ? "Aman (0 pengungsi)" : String.format("%.1f Hari", doc);
+                String style = pct < 50 ? ThemeConstants.BADGE_CRITICAL : (pct < 80 ? ThemeConstants.BADGE_WARNING : ThemeConstants.BADGE_SAFE);
+                
+                HBox row = new HBox(8);
+                row.setAlignment(Pos.CENTER_LEFT);
+                row.setPadding(new Insets(2, 0, 2, 0));
+                
+                Label nameLbl = new Label(s.getMedicineName() + ": " + s.getQuantity() + " " + s.getUnit() + " (DoC: " + docStr + ")");
+                nameLbl.setStyle("-fx-text-fill: " + ThemeConstants.ON_SURFACE + "; -fx-font-size: 11px;");
+                HBox.setHgrow(nameLbl, Priority.ALWAYS);
+                
+                Label alertBadge = new Label(pct < 50 ? "KRITIS" : (pct < 80 ? "WASPADA" : "AMAN"));
+                alertBadge.setStyle(style + " -fx-font-size: 9px; -fx-padding: 1 5 1 5;");
+                
+                row.getChildren().addAll(nameLbl, alertBadge);
+                shelterStocksContainer.getChildren().add(row);
+            }
         }
     }
 

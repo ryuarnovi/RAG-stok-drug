@@ -2,8 +2,11 @@
 
 -- Clean up
 TRUNCATE TABLE audit_logs CASCADE;
+TRUNCATE TABLE refugee_movements CASCADE;
 TRUNCATE TABLE inventory_transactions CASCADE;
+TRUNCATE TABLE distribution_details CASCADE;
 TRUNCATE TABLE distributions CASCADE;
+TRUNCATE TABLE shelter_stocks CASCADE;
 TRUNCATE TABLE medicines CASCADE;
 TRUNCATE TABLE refugees CASCADE;
 TRUNCATE TABLE shelters CASCADE;
@@ -22,31 +25,36 @@ INSERT INTO users (username, password_hash, full_name, role) VALUES
 ('shelter', '$2a$12$NyYrBjXt0HBAjtjACgmXJusscU6PywyeSaiz6a7tVaILr8DtpfSi.', 'Budi Santoso', 'SHELTER_OFFICER');
 
 -- Events
-INSERT INTO events (name, location, status, description) VALUES
-('Kebakaran Hutan Riau', 'Kabupaten Bengkalis, Riau', 'ACTIVE', 'Kebakaran lahan gambut meluas akibat musim kemarau ekstrem.'),
-('Kebakaran Depo Plumpang', 'Koja, Jakarta Utara', 'CLOSED', 'Insiden kebakaran area depo penampungan BBM.'),
-('Kebakaran Pemukiman Padat Tambora', 'Tambora, Jakarta Barat', 'ACTIVE', 'Kebakaran pemukiman padat penduduk yang menghanguskan ratusan rumah.');
+INSERT INTO events (name, location, status, description, shelter_count) VALUES
+('Kebakaran Hutan Riau', 'Kabupaten Bengkalis, Riau', 'ACTIVE', 'Kebakaran lahan gambut meluas akibat musim kemarau ekstrem.', 2),
+('Kebakaran Depo Plumpang', 'Koja, Jakarta Utara', 'CLOSED', 'Insiden kebakaran area depo penampungan BBM.', 1),
+('Kebakaran Pemukiman Padat Tambora', 'Tambora, Jakarta Barat', 'ACTIVE', 'Kebakaran pemukiman padat penduduk yang menghanguskan ratusan rumah.', 3);
 
 -- Shelters
-INSERT INTO shelters (name, location, capacity, current_occupancy, status, penanggung_jawab) VALUES
-('GOR Grogol', 'Grogol Petamburan, Jakarta Barat', 200, 150, 'WASPADA', 'Budi Santoso'),
-('Stadion Utama Riau (Shelter A)', 'Pekanbaru, Riau', 500, 120, 'AMAN', 'Hendra Kusuma'),
-('Masjid Agung Baiturrahman', 'Tambora, Jakarta Barat', 100, 95, 'KRITIS', 'Ahmad Fauzi'),
-('RPTRA Utama Jaya', 'Koja, Jakarta Utara', 80, 0, 'AMAN', 'Siti Aminah'),
-('Kantor Kelurahan Bengkalis', 'Bengkalis, Riau', 150, 150, 'KRITIS', 'Dedi Hermawan');
+INSERT INTO shelters (name, location, capacity, current_occupancy, status, penanggung_jawab, event_id) VALUES
+('GOR Grogol', 'Grogol Petamburan, Jakarta Barat', 200, 150, 'WASPADA', 'Budi Santoso', 3),
+('Stadion Utama Riau (Shelter A)', 'Pekanbaru, Riau', 500, 120, 'AMAN', 'Hendra Kusuma', 1),
+('Masjid Agung Baiturrahman', 'Tambora, Jakarta Barat', 100, 95, 'KRITIS', 'Ahmad Fauzi', 3),
+('RPTRA Utama Jaya', 'Koja, Jakarta Utara', 80, 0, 'AMAN', 'Siti Aminah', 2),
+('Kantor Kelurahan Bengkalis', 'Bengkalis, Riau', 150, 150, 'KRITIS', 'Dedi Hermawan', 1);
 
 -- Refugees
-INSERT INTO refugees (name, nik, age, gender, status, medical_notes, shelter_id) VALUES
-('Slamet Raharjo', '3173010203640001', 60, 'Laki-laki', 'CHECKED_IN', 'Mengalami sesak napas ringan (ISPA).', 1),
-('Siti Rahmawati', '3173014203680002', 56, 'Perempuan', 'CHECKED_IN', 'Riwayat diabetes melitus tipe 2, butuh insulin.', 1),
-('Andi Wijaya', '3173011204950003', 29, 'Laki-laki', 'CHECKED_IN', 'Luka bakar derajat 1 di lengan kanan, sudah diobati.', 1),
-('Rina Amelia', '3173015506980004', 26, 'Perempuan', 'CHECKED_IN', 'Hamil trimester ke-3, memerlukan suplemen vitamin.', 3),
-('Budi Cahyono', '1403010507720001', 52, 'Laki-laki', 'CHECKED_IN', 'Mengeluh pusing dan demam tinggi.', 2),
-('Dewi Lestari', '1403014608750002', 49, 'Perempuan', 'CHECKED_IN', 'Asma bronkial aktif, butuh inhaler salbutamol.', 2),
-('Doni Pratama', '1403011809050003', 19, 'Laki-laki', 'CHECKED_OUT', 'Sudah kembali ke rumah kerabat.', 2),
-('Eka Yulianti', '3172025210920005', 32, 'Perempuan', 'CHECKED_IN', 'Diare akut dan dehidrasi ringan.', 3),
-('Feri Setiawan', '3172021511900006', 34, 'Laki-laki', 'CHECKED_IN', 'Luka lecet di kaki akibat reruntuhan.', 3),
-('Gita Permata', '1403026212880007', 36, 'Perempuan', 'CHECKED_IN', 'Mengalami syok pasca bencana (trauma ringan).', 5);
+INSERT INTO refugees (name, nik, age, gender, status, medical_notes, priority_status, family_code, shelter_id) VALUES
+('Slamet Raharjo', '3173010203640001', 60, 'Laki-laki', 'CHECKED_IN', 'Mengalami sesak napas ringan (ISPA).', 'LANSIA', 'FAM-001', 1),
+('Siti Rahmawati', '3173014203680002', 56, 'Perempuan', 'CHECKED_IN', 'Riwayat diabetes melitus tipe 2, butuh insulin.', 'SICK', 'FAM-001', 1),
+('Andi Wijaya', '3173011204950003', 29, 'Laki-laki', 'CHECKED_IN', 'Luka bakar derajat 1 di lengan kanan, sudah diobati.', 'REGULAR', 'FAM-002', 1),
+('Rina Amelia', '3173015506980004', 26, 'Perempuan', 'CHECKED_IN', 'Hamil trimester ke-3, memerlukan suplemen vitamin.', 'IBU_HAMIL', 'FAM-003', 3),
+('Budi Cahyono', '1403010507720001', 52, 'Laki-laki', 'CHECKED_IN', 'Mengeluh pusing dan demam tinggi.', 'SICK', 'FAM-004', 2),
+('Dewi Lestari', '1403014608750002', 49, 'Perempuan', 'CHECKED_IN', 'Asma bronkial aktif, butuh inhaler salbutamol.', 'REGULAR', 'FAM-004', 2),
+('Doni Pratama', '1403011809050003', 19, 'Laki-laki', 'CHECKED_OUT', 'Sudah kembali ke rumah kerabat.', 'REGULAR', 'FAM-005', 2),
+('Eka Yulianti', '3172025210920005', 32, 'Perempuan', 'CHECKED_IN', 'Diare akut dan dehidrasi ringan.', 'REGULAR', 'FAM-006', 3),
+('Feri Setiawan', '3172021511900006', 34, 'Laki-laki', 'CHECKED_IN', 'Luka lecet di kaki akibat reruntuhan.', 'REGULAR', 'FAM-006', 3),
+('Gita Permata', '1403026212880007', 36, 'Perempuan', 'CHECKED_IN', 'Mengalami syok pasca bencana (trauma ringan).', 'REGULAR', 'FAM-007', 5);
+
+-- Refugee Movements
+INSERT INTO refugee_movements (refugee_id, from_shelter_id, to_shelter_id, moved_by, notes) VALUES
+(1, NULL, 1, 'admin', 'Registrasi masuk awal ke GOR Grogol'),
+(2, NULL, 1, 'admin', 'Registrasi masuk awal ke GOR Grogol');
 
 -- Suppliers
 INSERT INTO suppliers (supplier_name, contact_person, phone, email, address) VALUES
@@ -91,3 +99,22 @@ INSERT INTO inventory_transactions (medicine_id, transaction_type, quantity, not
 (1, 'OUT', 260, 'Distribusi darurat ke Shelter Masjid GOR Grogol'),
 (2, 'OUT', 55, 'Distribusi darurat ke Shelter RPTRA'),
 (5, 'OUT', 5, 'Pemberian resep darurat');
+
+-- Distribution Details
+INSERT INTO distribution_details (distribution_id, medicine_id, quantity) VALUES
+(1, 2, 50),
+(1, 4, 50),
+(3, 3, 20),
+(3, 7, 30);
+
+-- Shelter Stocks
+INSERT INTO shelter_stocks (shelter_id, medicine_id, quantity, minimum_stock) VALUES
+(1, 1, 150, 100),
+(1, 2, 80, 50),
+(1, 4, 100, 50),
+(2, 2, 40, 50),
+(2, 5, 25, 30),
+(3, 1, 200, 100),
+(3, 8, 150, 50),
+(5, 3, 30, 20),
+(5, 7, 35, 20);
