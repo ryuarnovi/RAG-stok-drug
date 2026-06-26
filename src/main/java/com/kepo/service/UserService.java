@@ -68,6 +68,21 @@ public class UserService {
         return userRepo.delete(userId);
     }
 
+    public User saveUserFromApi(String username, String password, String fullName, String role) {
+        User u = new User();
+        u.setUsername(username);
+        if (password != null && !password.isEmpty()) {
+            u.setPasswordHash(PasswordUtil.hash(password));
+        }
+        u.setFullName(fullName);
+        u.setRole(User.Role.valueOf(role));
+        boolean saved = userRepo.save(u);
+        if (saved && currentUser != null) {
+            logActivity(currentUser.getUsername(), "SAVE_USER", "Menyimpan user dari API: " + username);
+        }
+        return saved ? u : null;
+    }
+
     public List<AuditLog> getAuditLogs() {
         return auditRepo.findAll();
     }

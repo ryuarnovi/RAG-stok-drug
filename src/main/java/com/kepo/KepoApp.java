@@ -12,21 +12,16 @@ import com.kepo.service.ai.AIProvider;
 import com.kepo.service.ai.AIProviderChain;
 import com.kepo.service.ai.GeminiProvider;
 import com.kepo.service.ai.LocalRuleBasedProvider;
-import com.kepo.view.LoginView;
-import com.kepo.view.MainLayout;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.stage.Stage;
+import com.kepo.api.RestApiServer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
-public class KepoApp extends Application {
+public class KepoApp {
 
-    private Stage primaryStage;
     private AppConfig appConfig;
     private DatabaseConfig dbConfig;
 
-    // Services
     private UserService userService;
     private EventService eventService;
     private ShelterService shelterService;
@@ -38,35 +33,28 @@ public class KepoApp extends Application {
     private BarcodeService barcodeService;
     private AIRecommendationService aiRecommendationService;
 
-    // Controllers
     private LoginController loginController;
     private DashboardController dashboardController;
     private InventoryController inventoryController;
     private RefugeeShelterController refugeeShelterController;
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("KEPO - Kendali Evakuasi Bencana");
+    private RestApiServer apiServer;
+    private ObjectMapper objectMapper;
 
+    public KepoApp() {
         try {
-            // 1. Initialize configurations
             appConfig = new AppConfig();
             dbConfig = DatabaseConfig.getInstance();
             dbConfig.initialize(appConfig);
 
-            // 2. Test database connection
             if (!dbConfig.testConnection()) {
-                showDatabaseErrorAlert();
-                Platform.exit();
+                System.err.println("Database connection failed. Exiting.");
                 System.exit(1);
             }
 
-            // 3. Initialize schema and seed data
             dbConfig.runSchema();
             dbConfig.runSeed();
 
-            // 4. Initialize repositories
             UserRepository userRepo = new UserRepository(dbConfig);
             EventRepository eventRepo = new EventRepository(dbConfig);
             ShelterRepository shelterRepo = new ShelterRepository(dbConfig);
@@ -76,8 +64,11 @@ public class KepoApp extends Application {
             DonorRepository donorRepo = new DonorRepository(dbConfig);
             AuditLogRepository auditRepo = new AuditLogRepository(dbConfig);
             InventoryTransactionRepository transactionRepo = new InventoryTransactionRepository(dbConfig);
+            RefugeeMovementRepository movementRepo = new RefugeeMovementRepository(dbConfig);
+            ShelterStockRepository shelterStockRepo = new ShelterStockRepository(dbConfig);
+            SupplierRepository supplierRepo = new SupplierRepository(dbConfig);
+            MedicineRequestRepository medicineRequestRepo = new MedicineRequestRepository(dbConfig);
 
-            // 5. Initialize services
             userService = new UserService(userRepo, auditRepo);
             eventService = new EventService(eventRepo, userService);
             shelterService = new ShelterService(shelterRepo, userService);
@@ -88,7 +79,6 @@ public class KepoApp extends Application {
             barcodeService = new BarcodeService(medicineRepo);
             reportService = new ReportService(shelterRepo, refugeeRepo, medicineRepo, distributionRepo, donorRepo, eventRepo, appConfig.getReportsOutputDir());
 
-            // AI Initialization
             String provider = appConfig.getAIProvider().toUpperCase();
             AIProvider localFallback = new LocalRuleBasedProvider(shelterRepo, refugeeRepo, medicineRepo);
             AIProvider aiProvider;
@@ -99,90 +89,43 @@ public class KepoApp extends Application {
             } else {
                 aiProvider = localFallback;
             }
-
             aiRecommendationService = new AIRecommendationService(shelterRepo, refugeeRepo, medicineRepo, distributionRepo, eventRepo, aiProvider);
 
-            // 6. Initialize controllers
             loginController = new LoginController(userService);
-            
-            RefugeeMovementRepository movementRepo = new RefugeeMovementRepository(dbConfig);
-            ShelterStockRepository shelterStockRepo = new ShelterStockRepository(dbConfig);
-            
             RefugeeShelterService refugeeShelterService = new RefugeeShelterService(refugeeRepo, movementRepo, shelterRepo);
             ShelterStockService shelterStockService = new ShelterStockService(shelterStockRepo, shelterRepo);
-            
             refugeeShelterController = new RefugeeShelterController(refugeeShelterService, shelterStockService, userService);
-            
             dashboardController = new DashboardController(shelterService, refugeeService, inventoryService, distributionService, eventService, aiRecommendationService, userService, shelterStockService);
             inventoryController = new InventoryController(inventoryService, barcodeService);
 
-            // 7. Show Login view
-            showLoginView();
+            SupplierService supplierService = new SupplierService(supplierRepo, userService);
+
+            objectMapper = new ObjectMapper();
+            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.findAndRegisterModules();
+
+            int port = Integer.parseInt(appConfig.get("server.port", "8080"));
+            apiServer = new RestApiServer(
+                port, objectMapper,
+                userService, eventService, shelterService, refugeeService,
+                inventoryService, distributionService, donorService,
+                supplierService, reportService, barcodeService,
+                aiRecommendationService, shelterStockService,
+                loginController, dashboardController, inventoryController,
+                refugeeShelterController,
+                medicineRepo, shelterRepo, medicineRequestRepo
+            );
+            apiServer.start();
+            System.out.println("KEPO API Server started on port " + port);
 
         } catch (Exception e) {
             e.printStackTrace();
-            showFatalErrorAlert(e.getMessage());
-            Platform.exit();
             System.exit(1);
         }
     }
 
-    public void showLoginView() {
-        LoginView loginView = new LoginView(loginController, this);
-        Scene scene = new Scene(loginView, 900, 600);
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.centerOnScreen();
-        primaryStage.show();
-    }
-
-    public void showMainApplication() {
-        MainLayout mainLayout = new MainLayout(
-                dashboardController,
-                inventoryController,
-                refugeeShelterController,
-                userService,
-                eventService,
-                shelterService,
-                refugeeService,
-                distributionService,
-                donorService,
-                reportService,
-                aiRecommendationService,
-                this
-        );
-        Scene scene = new Scene(mainLayout, 1280, 800);
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(true);
-        primaryStage.centerOnScreen();
-        primaryStage.show();
-    }
-
-    private void showDatabaseErrorAlert() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Database Connection Error");
-        alert.setHeaderText("Koneksi Database Gagal");
-        alert.setContentText("Aplikasi KEPO tidak dapat terhubung ke PostgreSQL.\n" +
-                "Pastikan server PostgreSQL sudah berjalan dan konfigurasi DB_URL di file .env sudah benar.");
-        alert.showAndWait();
-    }
-
-    private void showFatalErrorAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Fatal Error");
-        alert.setHeaderText("Gagal Menjalankan Aplikasi");
-        alert.setContentText("Terjadi kesalahan sistem: " + message);
-        alert.showAndWait();
-    }
-
-    @Override
-    public void stop() {
-        if (dbConfig != null) {
-            dbConfig.shutdown();
-        }
-    }
-
     public static void main(String[] args) {
-        launch(args);
+        new KepoApp();
     }
 }

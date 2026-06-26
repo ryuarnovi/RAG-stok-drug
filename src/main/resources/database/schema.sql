@@ -1,5 +1,6 @@
 -- KEPO Database Schema (PostgreSQL)
 
+DROP TABLE IF EXISTS medicine_requests CASCADE;
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS refugee_movements CASCADE;
 DROP TABLE IF EXISTS inventory_transactions CASCADE;
@@ -155,6 +156,22 @@ CREATE TABLE inventory_transactions (
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     notes TEXT
 );
+
+-- Medicine Requests table (per refugee / user)
+CREATE TABLE medicine_requests (
+    request_id SERIAL PRIMARY KEY,
+    refugee_id INT NOT NULL REFERENCES refugees(refugee_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    shelter_id INT NOT NULL REFERENCES shelters(shelter_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    medicine_code VARCHAR(30) NOT NULL,
+    medicine_name VARCHAR(200) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING, APPROVED, REJECTED, FULFILLED
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_medreq_shelter ON medicine_requests(shelter_id);
+CREATE INDEX idx_medreq_status ON medicine_requests(status);
 
 -- Audit Logs table
 CREATE TABLE audit_logs (

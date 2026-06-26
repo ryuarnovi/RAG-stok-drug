@@ -21,14 +21,15 @@ public class AIProviderChain implements AIProvider {
     }
 
     private boolean isError(String response) {
-        String lower = response.toLowerCase();
-        return lower.contains("error") ||
-               lower.contains("gagal") ||
-               lower.contains("belum dikonfigurasi") ||
-               lower.contains("http ") ||
-               lower.contains("tidak ada respons") ||
-               lower.contains("diblokir") ||
-               lower.contains("expired") ||
-               lower.contains("api key");
+        String lower = response.toLowerCase().trim();
+        // Only treat as error if response starts with these patterns (not mid-sentence)
+        return lower.startsWith("error") ||
+               lower.startsWith("gagal") ||
+               lower.startsWith("belum dikonfigurasi") ||
+               lower.startsWith("tidak ada respons") ||
+               lower.startsWith("diblokir") ||
+               lower.startsWith("expired") ||
+               lower.matches("^https?://.*") ||
+               lower.startsWith("api key");
     }
 }

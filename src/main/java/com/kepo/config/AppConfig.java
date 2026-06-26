@@ -17,7 +17,7 @@ public class AppConfig {
 
     static {
         ENV_MAPPING.put("db.url", "DB_URL");
-        ENV_MAPPING.put("db.username", "DB_USERNAME");
+        ENV_MAPPING.put("db.username", "DB_USER");
         ENV_MAPPING.put("db.password", "DB_PASSWORD");
         ENV_MAPPING.put("db.pool.size", "DB_POOL_SIZE");
         ENV_MAPPING.put("ai.provider", "AI_PROVIDER");
@@ -29,6 +29,7 @@ public class AppConfig {
         ENV_MAPPING.put("app.version", "APP_VERSION");
         ENV_MAPPING.put("app.near_expiry_days", "APP_NEAR_EXPIRY_DAYS");
         ENV_MAPPING.put("reports.output_dir", "REPORTS_OUTPUT_DIR");
+        ENV_MAPPING.put("server.port", "SERVER_PORT");
     }
 
     public AppConfig() {
@@ -47,11 +48,12 @@ public class AppConfig {
         properties.setProperty("ai.openai.api_key", "");
         properties.setProperty("ai.openai.model", "gpt-3.5-turbo");
         properties.setProperty("ai.gemini.api_key", "");
-        properties.setProperty("ai.gemini.model", "gemini-2.5-flash-lite");
+        properties.setProperty("ai.gemini.model", "gemini-2.0-flash");
         properties.setProperty("app.name", "KEPO");
         properties.setProperty("app.version", "2.0.0");
         properties.setProperty("app.near_expiry_days", "30");
         properties.setProperty("reports.output_dir", "reports");
+        properties.setProperty("server.port", "8080");
     }
 
     private void loadFromEnvFile() {
