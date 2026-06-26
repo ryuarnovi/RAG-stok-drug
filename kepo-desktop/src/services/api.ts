@@ -117,6 +117,9 @@ export const api = {
   aiAnalyze: (query: string) =>
     request<{ response: string }>('/ai/analyze', { method: 'POST', body: JSON.stringify({ query }) }),
 
+  // Barcode
+  barcodeLookup: (code: string) => request<Medicine>(`/barcode/lookup?code=${encodeURIComponent(code)}`),
+
   // Medicine Requests
   getMedicineRequests: () => request<MedicineRequest[]>('/medicine-requests'),
 

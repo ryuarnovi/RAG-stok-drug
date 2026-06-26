@@ -217,6 +217,72 @@ public class RestApiServer {
             }
         });
 
+        // Barcode: generate image
+        server.createContext("/api/barcode/generate", exchange -> {
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1); exchange.close(); return;
+            }
+            String query = exchange.getRequestURI().getRawQuery();
+            String code = null;
+            if (query != null) {
+                for (String pair : query.split("&")) {
+                    String[] kv = pair.split("=", 2);
+                    if (kv.length == 2 && "code".equals(kv[0])) {
+                        code = java.net.URLDecoder.decode(kv[1], "UTF-8");
+                    }
+                }
+            }
+            if (code == null || code.isBlank()) {
+                Map<String, String> err = new HashMap<>(); err.put("error", "Parameter 'code' diperlukan");
+                writeJson(exchange, 400, err); return;
+            }
+            java.awt.image.BufferedImage img = barcodeService.generateBarcode(code);
+            if (img == null) {
+                Map<String, String> err = new HashMap<>(); err.put("error", "Gagal generate barcode");
+                writeJson(exchange, 500, err); return;
+            }
+            exchange.getResponseHeaders().set("Content-Type", "image/png");
+            exchange.sendResponseHeaders(200, 0);
+            javax.imageio.ImageIO.write(img, "PNG", exchange.getResponseBody());
+            exchange.getResponseBody().close();
+        });
+
+        // Barcode: decode image
+        server.createContext("/api/barcode/decode", new JsonHandler() {
+            @Override protected Object handle(String method, Map<String, String> params, String body) throws Exception {
+                if (!"POST".equals(method)) return error(405, "Method not allowed");
+                ObjectNode node = (ObjectNode) json.readTree(body);
+                String imageData = node.has("image") ? node.get("image").asText() : "";
+                if (imageData.isBlank()) return error(400, "Image data required");
+                // Decode base64 image
+                String base64Data = imageData.contains(",") ? imageData.split(",")[1] : imageData;
+                byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+                java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(imageBytes));
+                if (img == null) return error(400, "Cannot decode image");
+                String code = barcodeService.decodeBarcode(img);
+                Map<String, String> res = new HashMap<>();
+                if (code != null) {
+                    res.put("code", code);
+                } else {
+                    res.put("code", "");
+                    res.put("error", "Barcode tidak terdeteksi");
+                }
+                return res;
+            }
+        });
+
+        // Barcode: lookup medicine by barcode code
+        server.createContext("/api/barcode/lookup", new JsonHandler() {
+            @Override protected Object handle(String method, Map<String, String> params, String body) throws Exception {
+                if (!"GET".equals(method)) return error(405, "Method not allowed");
+                String code = params.get("code");
+                if (code == null || code.isBlank()) return error(400, "Parameter 'code' diperlukan");
+                Medicine m = barcodeService.lookupMedicine(code);
+                if (m == null) return error(404, "Obat tidak ditemukan untuk kode: " + code);
+                return m;
+            }
+        });
+
         // Reports
         server.createContext("/api/reports", new JsonHandler() {
             @Override protected Object handle(String method, Map<String, String> params, String body) throws Exception {
@@ -227,9 +293,11 @@ public class RestApiServer {
                 switch (type) {
                     case "shelter": filePath = reportService.generateShelterReport(format); break;
                     case "refugee": filePath = reportService.generateRefugeeReport(format); break;
+                    case "medicine":
                     case "inventory": filePath = reportService.generateInventoryReport(format); break;
                     case "distribution": filePath = reportService.generateDistributionReport(format); break;
                     case "donor": filePath = reportService.generateDonorReport(format); break;
+                    case "operation":
                     case "event": filePath = reportService.generateEventReport(format); break;
                     default: return error(400, "Invalid report type");
                 }

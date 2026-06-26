@@ -2,10 +2,18 @@ import { useState, useEffect } from 'react'
 import { api } from '../services/api'
 import type { Medicine, Supplier } from '../types'
 
+const KATEGORI_OBAT = [
+  'Antibiotik', 'Analgesik', 'Antipiretik', 'Anti-inflamasi',
+  'Antihistamin', 'Antidiabetes', 'Antihipertensi', 'Antijamur',
+  'Antivirus', 'Antasida', 'Bronkodilator', 'Diuretik',
+  'Kortikosteroid', 'Vitamin & Suplemen', 'Gastrointestinal',
+  'Obat Mata', 'Obat Kulit', 'Elektrolit', 'Vaksin', 'Lainnya',
+]
+
 const mockMedicines: Medicine[] = [
-  { medicineId: 1, medicineCode: 'OBT-001', medicineName: 'Paracetamol 500mg', category: 'Analgesik', batchNumber: 'BATCH-001', unit: 'Strip', stockQuantity: 500, minimumStock: 100, purchasePrice: 5000, sellingPrice: 7500, expiryDate: '2026-12-31', supplierId: 1 },
-  { medicineId: 2, medicineCode: 'OBT-002', medicineName: 'Amoxicillin 250mg', category: 'Antibiotik', batchNumber: 'BATCH-002', unit: 'Strip', stockQuantity: 30, minimumStock: 100, purchasePrice: 8000, sellingPrice: 12000, expiryDate: '2026-06-30', supplierId: 1 },
-  { medicineId: 3, medicineCode: 'OBT-003', medicineName: 'Oralit 200ml', category: 'Elektrolit', batchNumber: 'BATCH-003', unit: 'Botol', stockQuantity: 0, minimumStock: 200, purchasePrice: 3000, sellingPrice: 5000, expiryDate: '2027-01-15', supplierId: 2 },
+  { medicineId: 1, medicineCode: 'OBT-001', medicineName: 'Paracetamol 500mg', category: 'Analgesik', batchNumber: 'BTH-001', unit: 'Strip', stockQuantity: 500, minimumStock: 100, purchasePrice: 5000, sellingPrice: 7500, expiryDate: '2026-12-31', supplierId: 1 },
+  { medicineId: 2, medicineCode: 'OBT-002', medicineName: 'Amoxicillin 250mg', category: 'Antibiotik', batchNumber: 'BTH-002', unit: 'Strip', stockQuantity: 30, minimumStock: 100, purchasePrice: 8000, sellingPrice: 12000, expiryDate: '2026-06-30', supplierId: 1 },
+  { medicineId: 3, medicineCode: 'OBT-003', medicineName: 'Oralit 200ml', category: 'Elektrolit', batchNumber: 'BTH-003', unit: 'Botol', stockQuantity: 0, minimumStock: 200, purchasePrice: 3000, sellingPrice: 5000, expiryDate: '2027-01-15', supplierId: 2 },
 ]
 const mockSuppliers: Supplier[] = [
   { supplierId: 1, supplierName: 'PT Farmasi Sehat', contactPerson: 'Budi', phone: '021-123456', email: 'budi@sehat.com', address: 'Jakarta' },
@@ -22,6 +30,7 @@ export default function Inventory() {
   const [showAdjust, setShowAdjust] = useState(false)
   const [adjType, setAdjType] = useState('IN')
   const [adjQty, setAdjQty] = useState(0)
+  const [barcodePopup, setBarcodePopup] = useState<Medicine | null>(null)
 
   useEffect(() => {
     const fetch = async () => {
@@ -109,10 +118,33 @@ export default function Inventory() {
             {filtered.map(m => (
               <div className="card data-card" key={m.medicineId} onClick={() => openDrawer(m)}>
                 <div className="data-card-title">{m.medicineName}</div>
-                <div className="data-card-subtitle">{m.medicineCode}</div>
+                <div className="data-card-subtitle">
+                  <span>{m.medicineCode}</span>
+                  <span className="data-card-kategori">{m.category}</span>
+                </div>
+                <div className="barcode-container" onClick={e => { e.stopPropagation(); setBarcodePopup(m) }}>
+                  <img
+                    className="barcode-img"
+                    src={`/api/barcode/generate?code=${m.medicineCode}`}
+                    alt={`Barcode ${m.medicineCode}`}
+                    onError={e => {
+                      const el = e.target as HTMLImageElement
+                      if (el.style.display === 'none') return
+                      el.style.display = 'none'
+                      const fallback = el.nextElementSibling
+                      if (fallback) (fallback as HTMLElement).style.display = 'flex'
+                    }}
+                  />
+                  <div className="barcode-fallback">{m.medicineCode}</div>
+                  <div className="barcode-click-hint">Perbesar</div>
+                </div>
                 <div className="data-card-row">
                   <span className="data-card-label">Stok</span>
                   <span className="data-card-value">{m.stockQuantity} {m.unit}</span>
+                </div>
+                <div className="data-card-row">
+                  <span className="data-card-label">Batch</span>
+                  <span className="data-card-value">{m.batchNumber || '-'}</span>
                 </div>
                 <div className="data-card-row">
                   <span className="data-card-label">Kadaluarsa</span>
@@ -137,11 +169,25 @@ export default function Inventory() {
             </div>
             <div className="form-group">
               <label className="form-label">Kategori</label>
-              <input className="input" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+              <select className="select" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
+                <option value="">Pilih Kategori</option>
+                {KATEGORI_OBAT.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Batch</label>
-              <input className="input" value={form.batchNumber} onChange={e => setForm(p => ({ ...p, batchNumber: e.target.value }))} />
+              <label className="form-label">Batch / Barcode</label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input className="input flex-1" value={form.batchNumber} onChange={e => setForm(p => ({ ...p, batchNumber: e.target.value }))} placeholder="Contoh: BTH-001" />
+                {selectedMedicine && (
+                  <img
+                    src={`/api/barcode/generate?code=${form.medicineCode}`}
+                    alt="barcode"
+                    style={{ height: 36, borderRadius: 4, cursor: 'pointer' }}
+                    onClick={() => setBarcodePopup(selectedMedicine)}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                )}
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">Unit</label>
@@ -212,6 +258,35 @@ export default function Inventory() {
       )}
 
       {showAdjust && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 999 }} onClick={() => setShowAdjust(false)} />}
+
+      {barcodePopup && (
+        <div className="drawer-overlay" onClick={() => setBarcodePopup(null)} style={{ zIndex: 1100 }}>
+          <div className="card card-padded" onClick={e => e.stopPropagation()} style={{ textAlign: 'center', maxWidth: 420, width: '90%', padding: 24 }}>
+            <div className="flex items-center justify-between mb-16">
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 16, fontWeight: 700 }}>{barcodePopup.medicineName}</div>
+                <div style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{barcodePopup.medicineCode}</div>
+              </div>
+              <button className="btn btn-outline btn-sm" onClick={() => setBarcodePopup(null)}>Tutup</button>
+            </div>
+            <div style={{ background: '#fff', borderRadius: 8, padding: '16px 0' }}>
+              <img
+                src={`/api/barcode/generate?code=${barcodePopup.medicineCode}`}
+                alt={barcodePopup.medicineCode}
+                style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
+              />
+            </div>
+            <div className="barcode-popup-info">
+              <span>Batch: <strong>{barcodePopup.batchNumber || '-'}</strong></span>
+              <span>Stok: <strong>{barcodePopup.stockQuantity} {barcodePopup.unit}</strong></span>
+              <span>Exp: <strong>{barcodePopup.expiryDate || '-'}</strong></span>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--on-surface-variant)', marginTop: 12 }}>
+              Arahkan barcode ini ke scanner untuk pemindaian stok
+            </p>
+          </div>
+        </div>
+      )}
     </>
   )
 }

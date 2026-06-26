@@ -74,16 +74,16 @@ INSERT INTO donors (donor_name, contact, phone, email, address) VALUES
 
 -- Medicines
 INSERT INTO medicines (medicine_code, medicine_name, category, batch_number, unit, stock_quantity, minimum_stock, purchase_price, selling_price, expiry_date, supplier_id) VALUES
-('MED-001', 'Amoxicillin 500mg', 'Antibiotik', 'BTH-2024-001', 'Tablet', 1240, 100, 1500.00, 2500.00, '2027-12-15', 1),
-('MED-002', 'Paracetamol 500mg', 'Analgesik', 'BTH-2024-002', 'Tablet', 45, 100, 800.00, 1500.00, '2026-08-20', 2),
-('MED-003', 'Cetirizine Syrup', 'Antihistamin', 'BTH-2023-010', 'Botol', 12, 30, 12000.00, 18000.00, '2024-01-10', 1),
-('MED-004', 'Ibuprofen 400mg', 'Anti-inflamasi', 'BTH-2024-004', 'Kapsul', 850, 50, 2000.00, 3500.00, '2027-03-01', 3),
-('MED-005', 'Metformin HCl', 'Antidiabetes', 'BTH-2024-005', 'Tablet', 18, 50, 3000.00, 5000.00, '2026-11-30', 2),
-('MED-006', 'Insulin Glargine', 'Antidiabetes', 'BTH-2024-006', 'Vial', 4, 10, 250000.00, 350000.00, '2026-06-15', 4),
-('MED-007', 'Amoxicillin Syrup', 'Antibiotik', 'BTH-2024-007', 'Botol', 65, 20, 15000.00, 22000.00, '2026-07-12', 1),
-('MED-008', 'Vitamin C 500mg', 'Vitamin', 'BTH-2024-008', 'Tablet', 320, 50, 500.00, 1000.00, '2026-07-15', 5),
-('MED-009', 'Omeprazole 20mg', 'Gastrointestinal', 'BTH-2024-009', 'Kapsul', 95, 30, 4000.00, 6500.00, '2027-02-28', 3),
-('MED-010', 'Amlodipine 5mg', 'Antihipertensi', 'BTH-2024-010', 'Tablet', 200, 40, 2500.00, 4000.00, '2027-05-10', 4);
+('MED-001', 'Amoxicillin 500mg', 'Antibiotik', 'BTH-001', 'Tablet', 1240, 100, 1500.00, 2500.00, '2027-12-15', 1),
+('MED-002', 'Paracetamol 500mg', 'Analgesik', 'BTH-002', 'Tablet', 45, 100, 800.00, 1500.00, '2026-08-20', 2),
+('MED-003', 'Cetirizine Syrup', 'Antihistamin', 'BTH-003', 'Botol', 12, 30, 12000.00, 18000.00, '2024-01-10', 1),
+('MED-004', 'Ibuprofen 400mg', 'Anti-inflamasi', 'BTH-004', 'Kapsul', 850, 50, 2000.00, 3500.00, '2027-03-01', 3),
+('MED-005', 'Metformin HCl', 'Antidiabetes', 'BTH-005', 'Tablet', 18, 50, 3000.00, 5000.00, '2026-11-30', 2),
+('MED-006', 'Insulin Glargine', 'Antidiabetes', 'BTH-006', 'Vial', 4, 10, 250000.00, 350000.00, '2026-06-15', 4),
+('MED-007', 'Amoxicillin Syrup', 'Antibiotik', 'BTH-007', 'Botol', 65, 20, 15000.00, 22000.00, '2026-07-12', 1),
+('MED-008', 'Vitamin C 500mg', 'Vitamin & Suplemen', 'BTH-008', 'Tablet', 320, 50, 500.00, 1000.00, '2026-07-15', 5),
+('MED-009', 'Omeprazole 20mg', 'Gastrointestinal', 'BTH-009', 'Kapsul', 95, 30, 4000.00, 6500.00, '2027-02-28', 3),
+('MED-010', 'Amlodipine 5mg', 'Antihipertensi', 'BTH-010', 'Tablet', 200, 40, 2500.00, 4000.00, '2027-05-10', 4);
 
 -- Distributions
 INSERT INTO distributions (doc_num, shelter_id, item_type, quantity, status, notes) VALUES

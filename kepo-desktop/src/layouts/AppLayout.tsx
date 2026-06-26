@@ -6,6 +6,7 @@ import type { User } from '../types';
 
 export default function AppLayout() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,13 +28,20 @@ export default function AppLayout() {
 
   const handleNavigate = (page: string) => {
     navigate(`/app/${page}`);
+    setSidebarOpen(false);
   };
 
   return (
     <div className="app-layout">
-      <Sidebar currentUser={currentUser} activePage={activePage} onNavigate={handleNavigate} />
+      <div className={`sidebar-overlay${sidebarOpen ? ' show' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <Sidebar
+        currentUser={currentUser}
+        activePage={activePage}
+        onNavigate={handleNavigate}
+        isOpen={sidebarOpen}
+      />
       <div className="main-content">
-        <TopBar />
+        <TopBar onToggleSidebar={() => setSidebarOpen(v => !v)} />
         <div className="page-content">
           <Outlet />
         </div>

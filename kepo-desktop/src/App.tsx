@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Inventory from './pages/Inventory'
 import MedicineRequests from './pages/MedicineRequests'
+import BarcodeScanner from './pages/BarcodeScanner'
 import Distribution from './pages/Distribution'
 import SupplierDonor from './pages/SupplierDonor'
 import Events from './pages/Events'
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="medicine" element={<Inventory />} />
           <Route path="medrequest" element={<MedicineRequests />} />
+          <Route path="barcode" element={<BarcodeScanner />} />
           <Route path="distribution" element={<Distribution />} />
           <Route path="supp_donor" element={<SupplierDonor />} />
           <Route path="event" element={<Events />} />

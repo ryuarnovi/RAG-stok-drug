@@ -39,7 +39,7 @@ export default function Reports() {
           <p>{r.desc}</p>
           <div className="btn-group">
             <button className="btn btn-primary btn-sm" onClick={() => generateReport(r.type, 'pdf')}>PDF</button>
-            <button className="btn btn-outline btn-sm" onClick={() => generateReport(r.type, 'html')}>HTML</button>
+            <button className="btn btn-outline btn-sm" onClick={() => generateReport(r.type, 'csv')}>CSV</button>
             <button className="btn btn-secondary btn-sm" onClick={() => generateReport(r.type, 'excel')}>Excel</button>
           </div>
         </div>

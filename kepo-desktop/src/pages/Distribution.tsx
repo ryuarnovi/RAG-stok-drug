@@ -19,6 +19,7 @@ const mockMedicines: Medicine[] = [
 ]
 
 const steps = ['DRAFT', 'APPROVED', 'SHIPPED', 'RECEIVED'] as const
+const STATUS_LABEL: Record<string, string> = { DRAFT: 'Draft', APPROVED: 'Disetujui', SHIPPED: 'Dikirim', RECEIVED: 'Diterima' }
 
 export default function Distribution() {
   const [distributions, setDistributions] = useState<Distribution[]>([])
@@ -103,9 +104,9 @@ export default function Distribution() {
     setAllocQty(0)
   }
 
-  const statusLabel = (s: string) => {
-    const map: Record<string, string> = { DRAFT: 'draft', APPROVED: 'approved', SHIPPED: 'shipped', RECEIVED: 'received' }
-    return map[s] || 'draft'
+  const currentStep = (s: string) => {
+    const idx = steps.indexOf(s as typeof steps[number])
+    return idx >= 0 ? idx : 0
   }
 
   return (
@@ -130,13 +131,15 @@ export default function Distribution() {
                   <span className="data-card-label">Qty</span>
                   <span className="data-card-value">{d.quantity}</span>
                 </div>
-                <div className="timeline">
-                  {steps.map((step, i) => (
-                    <span key={step}>
-                      <span className={`timeline-step ${statusLabel(step)} ${steps.indexOf(d.status) < i ? 'inactive' : ''}`}>{step}</span>
-                      {i < steps.length - 1 && <span className="timeline-arrow">›</span>}
-                    </span>
-                  ))}
+                <div className="dist-timeline">
+                  {steps.map((step, i) => {
+                    const inactive = currentStep(d.status) < i
+                    return (
+                      <span key={step} className={`dist-step ${step.toLowerCase()}${inactive ? ' inactive' : ''}`}>
+                        {STATUS_LABEL[step]}
+                      </span>
+                    )
+                  })}
                 </div>
               </div>
             ))}
@@ -146,10 +149,12 @@ export default function Distribution() {
         {drawerOpen && (
           <div className="card card-padded panel-drawer">
             <div className="drawer-title">{selectedDist ? 'Edit Distribusi' : 'Tambah Distribusi'}</div>
+
             <div className="form-group">
               <label className="form-label">No Dokumen</label>
               <input className="input" value={form.docNum} onChange={e => setForm(p => ({ ...p, docNum: e.target.value }))} />
             </div>
+
             <div className="form-group">
               <label className="form-label">Shelter Tujuan</label>
               <select className="select" value={form.shelterId} onChange={e => setForm(p => ({ ...p, shelterId: Number(e.target.value) }))}>
@@ -157,27 +162,47 @@ export default function Distribution() {
                 {shelters.map(s => <option key={s.shelterId} value={s.shelterId}>{s.name}</option>)}
               </select>
             </div>
+
             <div className="form-group">
               <label className="form-label">Catatan</label>
               <textarea className="textarea" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
             </div>
+
             <hr className="drawer-separator" />
             <div className="drawer-title">Alokasi Obat</div>
+
+            {allocations.length === 0 && (
+              <p style={{ fontSize: 12, color: 'var(--on-surface-variant)', marginBottom: 10 }}>Belum ada alokasi obat.</p>
+            )}
             {allocations.map((a, i) => (
-              <div key={i} className="flex items-center justify-between" style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{a.medicineName}</span>
-                <span style={{ fontSize: 12, color: 'var(--on-surface-variant)' }}>{a.quantity} {a.unit}</span>
+              <div key={i} className="dist-alloc-item">
+                <div>
+                  <div className="dist-alloc-name">{a.medicineName}</div>
+                  <div className="dist-alloc-code">{a.medicineCode}</div>
+                </div>
+                <div className="dist-alloc-qty">{a.quantity} {a.unit}</div>
               </div>
             ))}
-            <div className="flex gap-10 items-center" style={{ marginTop: 8 }}>
-              <select className="select" style={{ flex: 1 }} value={selMedId} onChange={e => setSelMedId(Number(e.target.value))}>
+
+            <div className="dist-alloc-add">
+              <select className="select" value={selMedId} onChange={e => setSelMedId(Number(e.target.value))}>
                 <option value={0}>Pilih Obat</option>
-                {medicines.map(m => <option key={m.medicineId} value={m.medicineId}>{m.medicineName}</option>)}
+                {medicines.map(m => <option key={m.medicineId} value={m.medicineId}>{m.medicineName} (stok: {m.stockQuantity})</option>)}
               </select>
-              <input className="input" type="number" style={{ width: 80 }} placeholder="Qty" value={allocQty} onChange={e => setAllocQty(Number(e.target.value))} />
-              <button className="btn btn-sm btn-outline" onClick={addAllocation}>Tambah Obat</button>
+              <input className="input" type="number" placeholder="Qty" value={allocQty} onChange={e => setAllocQty(Number(e.target.value))} />
+              <button className="btn btn-sm btn-outline" onClick={addAllocation}>Tambah</button>
             </div>
+
             <hr className="drawer-separator" />
+
+            {selectedDist && selectedDist.status !== 'DRAFT' && (
+              <div className="dist-status-bar">
+                <span className={`badge badge-${selectedDist.status === 'APPROVED' ? 'warning' : selectedDist.status === 'SHIPPED' ? 'info' : 'in-stock'}`}>
+                  {STATUS_LABEL[selectedDist.status]}
+                </span>
+              </div>
+            )}
+
             <div className="drawer-btn-row">
               <button className="btn btn-primary flex-1" onClick={handleSave}>Simpan</button>
               {selectedDist && selectedDist.status === 'DRAFT' && (

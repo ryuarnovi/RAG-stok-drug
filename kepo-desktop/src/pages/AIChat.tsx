@@ -8,13 +8,33 @@ interface Message {
   timestamp: Date
 }
 
+const iconStyle = { width: 18, height: 18, flexShrink: 0 }
+
 const suggestions = [
-  { icon: '📊', title: 'Analisis Stok Kritis', desc: 'Obat apa yang perlu segera dipesan?' },
-  { icon: '🚚', title: 'Distribusi Prioritas', desc: 'Shelter mana yang butuh suplai utama?' },
-  { icon: '🔮', title: 'Prediksi Kebutuhan', desc: 'Perkiraan kebutuhan 7 hari ke depan' },
-  { icon: '🏠', title: 'Optimasi Shelter', desc: 'Rekomendasi penyebaran pengungsi' },
-  { icon: '📋', title: 'Shelter Kritis', desc: 'Shelter dengan kondisi darurat' },
-  { icon: '💊', title: 'Obat Hampir Expired', desc: 'Obat yang harus segera digunakan' },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 12h20" /></svg>,
+    title: 'Analisis Stok Kritis', desc: 'Obat apa yang perlu segera dipesan?',
+  },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>,
+    title: 'Distribusi Prioritas', desc: 'Shelter mana yang butuh suplai utama?',
+  },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>,
+    title: 'Prediksi Kebutuhan', desc: 'Perkiraan kebutuhan 7 hari ke depan',
+  },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+    title: 'Optimasi Shelter', desc: 'Rekomendasi penyebaran pengungsi',
+  },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+    title: 'Shelter Kritis', desc: 'Shelter dengan kondisi darurat',
+  },
+  {
+    icon: <svg style={iconStyle} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /><path d="M12 11v6" /><path d="M9 14h6" /></svg>,
+    title: 'Obat Hampir Expired', desc: 'Obat yang harus segera digunakan',
+  },
 ]
 
 const quickActions = [

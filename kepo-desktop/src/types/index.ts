@@ -145,4 +145,4 @@ export interface MedicineRequest {
   createdAt: string;
 }
 
-export type PageId = 'dashboard' | 'event' | 'shelter' | 'refugee' | 'medicine' | 'distribution' | 'supp_donor' | 'ai' | 'prediction' | 'report' | 'medrequest' | 'settings';
+export type PageId = 'dashboard' | 'event' | 'shelter' | 'refugee' | 'medicine' | 'distribution' | 'supp_donor' | 'ai' | 'prediction' | 'report' | 'medrequest' | 'barcode' | 'settings';
